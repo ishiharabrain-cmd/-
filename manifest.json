@@ -2,7 +2,7 @@
   "name": "いつでもサポート - 見当識支援アプリ",
   "short_name": "いつでもサポート",
   "description": "認知症の方向けの見当識支援アプリケーション",
-  "start_url": "index.html",
+  "start_url": "orientation-support-app.html",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
