@@ -150,27 +150,20 @@
                 <input type="tel" id="clinicPhone" placeholder="例：022-123-4567">
             </div>
 
-            <!-- 服薬時間 -->
+            <!-- 服薬時間（回数・時間・食前/食後） -->
             <div class="setting-group">
                 <h2>💊 お薬の時間</h2>
-                <div class="time-inputs">
-                    <div>
-                        <label>朝</label>
-                        <input type="time" id="medicineMorning" value="08:00">
-                    </div>
-                    <div>
-                        <label>昼</label>
-                        <input type="time" id="medicineLunch" value="12:00">
-                    </div>
-                    <div>
-                        <label>夕方</label>
-                        <input type="time" id="medicineEvening" value="18:00">
-                    </div>
-                    <div>
-                        <label>夜</label>
-                        <input type="time" id="medicineNight" value="21:00">
-                    </div>
-                </div>
+                <p style="color: #666; font-size: 0.95em; margin-bottom: 15px;">1日何回か、それぞれの時間と食前・食後を設定します。</p>
+                <label>1日の服薬回数</label>
+                <select id="medicineCount" style="margin-bottom: 15px;">
+                    <option value="1">1回</option>
+                    <option value="2">2回</option>
+                    <option value="3">3回</option>
+                    <option value="4">4回</option>
+                    <option value="5">5回</option>
+                    <option value="6">6回</option>
+                </select>
+                <div id="medicineDosesContainer"></div>
             </div>
 
             <!-- 送信方法のデフォルト -->
@@ -235,6 +228,67 @@
             }
         }
 
+        // 服薬設定のデフォルト（旧形式から移行用）
+        function getDefaultDoses() {
+            const raw = localStorage.getItem('medicineDoses');
+            if (raw) {
+                try {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr) && arr.length >= 1) return arr;
+                } catch (e) {}
+            }
+            return [
+                { key: 'dose0', label: '1回目', time: localStorage.getItem('medicineMorning') || '08:00', timing: 'other' },
+                { key: 'dose1', label: '2回目', time: localStorage.getItem('medicineLunch') || '12:00', timing: 'other' },
+                { key: 'dose2', label: '3回目', time: localStorage.getItem('medicineEvening') || '18:00', timing: 'other' },
+                { key: 'dose3', label: '4回目', time: localStorage.getItem('medicineNight') || '21:00', timing: 'other' }
+            ];
+        }
+
+        function renderMedicineDoses() {
+            const count = parseInt(document.getElementById('medicineCount').value, 10);
+            const container = document.getElementById('medicineDosesContainer');
+            const current = getDefaultDoses();
+            container.innerHTML = '';
+            const labels = ['1回目', '2回目', '3回目', '4回目', '5回目', '6回目'];
+            for (let i = 0; i < count; i++) {
+                const d = current[i] || { key: 'dose' + i, label: labels[i], time: '08:00', timing: 'other' };
+                const div = document.createElement('div');
+                div.style.cssText = 'margin-bottom: 18px; padding: 12px; background: #f8f9fa; border-radius: 10px;';
+                div.innerHTML = `
+                    <label style="display:block; margin-bottom: 6px;">${labels[i]}</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="time" id="medicineTime_${i}" value="${d.time}" style="padding: 10px;">
+                        <select id="medicineTiming_${i}" style="padding: 10px;">
+                            <option value="before" ${d.timing === 'before' ? 'selected' : ''}>食前</option>
+                            <option value="after" ${d.timing === 'after' ? 'selected' : ''}>食後</option>
+                            <option value="other" ${d.timing === 'other' ? 'selected' : ''}>その他</option>
+                        </select>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function saveMedicineDoses() {
+            const count = parseInt(document.getElementById('medicineCount').value, 10);
+            const labels = ['1回目', '2回目', '3回目', '4回目', '5回目', '6回目'];
+            const doses = [];
+            for (let i = 0; i < count; i++) {
+                const timeEl = document.getElementById('medicineTime_' + i);
+                const timingEl = document.getElementById('medicineTiming_' + i);
+                if (timeEl && timingEl) {
+                    doses.push({
+                        key: 'dose' + i,
+                        label: labels[i],
+                        time: timeEl.value,
+                        timing: timingEl.value
+                    });
+                }
+            }
+            localStorage.setItem('medicineDoses', JSON.stringify(doses));
+        }
+
         // 設定を読み込み
         function loadSettings() {
             const settings = {
@@ -247,19 +301,21 @@
                 familyEmail: localStorage.getItem('familyEmail') || '',
                 clinicName: localStorage.getItem('clinicName') || '脳とこころの石原クリニック',
                 clinicPhone: localStorage.getItem('clinicPhone') || '',
-                medicineMorning: localStorage.getItem('medicineMorning') || '08:00',
-                medicineLunch: localStorage.getItem('medicineLunch') || '12:00',
-                medicineEvening: localStorage.getItem('medicineEvening') || '18:00',
-                medicineNight: localStorage.getItem('medicineNight') || '21:00',
                 defaultSendMethod: localStorage.getItem('defaultSendMethod') || 'ask'
             };
 
             Object.keys(settings).forEach(key => {
                 const element = document.getElementById(key);
-                if (element) {
-                    element.value = settings[key];
-                }
+                if (element) element.value = settings[key];
             });
+
+            var doses = getDefaultDoses();
+            var countEl = document.getElementById('medicineCount');
+            if (countEl) {
+                countEl.value = Math.min(6, Math.max(1, doses.length));
+                countEl.addEventListener('change', renderMedicineDoses);
+            }
+            renderMedicineDoses();
         }
 
         // 設定を保存
@@ -269,14 +325,15 @@
             const fields = [
                 'userName', 'homeAddress', 'family1Name', 'family1Phone',
                 'family2Name', 'family2Phone', 'familyEmail', 'clinicName',
-                'clinicPhone', 'medicineMorning', 'medicineLunch',
-                'medicineEvening', 'medicineNight', 'defaultSendMethod'
+                'clinicPhone', 'defaultSendMethod'
             ];
 
             fields.forEach(field => {
-                const value = document.getElementById(field).value;
-                localStorage.setItem(field, value);
+                const el = document.getElementById(field);
+                if (el) localStorage.setItem(field, el.value);
             });
+
+            saveMedicineDoses();
 
             // 初回起動の場合はメインアプリへ
             const isFirstTime = localStorage.getItem('firstTime');

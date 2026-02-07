@@ -274,6 +274,10 @@
             <p style="color: rgba(255,255,255,0.7); font-size: 0.9em;">
                 2026-02-07
             </p>
+            <p style="margin-top: 16px; font-size: 0.85em;">
+                <a id="lineAiLink" href="#" target="_blank" rel="noopener" style="color: #667eea;">AI石原先生へ相談</a>
+            </p>
+            <p style="margin-top: 4px; font-size: 0.7em; color: #888;">※AIのため正確でない可能性があります</p>
         </div>
     </div>
 
@@ -304,6 +308,11 @@
         localStorage.setItem('appVersion', APP_VERSION);
         document.getElementById('headerVersion').textContent = 'Ver ' + APP_VERSION;
         document.getElementById('panelVersion').textContent = 'Version ' + APP_VERSION;
+
+        // AI石原先生へ相談（LINE公式アカウント等のURLを設定）
+        const LINE_AI_CONSULT_URL = 'https://lin.ee/7zY8dMP';
+        var lineAiEl = document.getElementById('lineAiLink');
+        if (lineAiEl) lineAiEl.href = LINE_AI_CONSULT_URL;
 
         // 時刻更新
         function updateTime() {
@@ -587,66 +596,57 @@
             }
         }
 
+        // 設定から服薬スケジュールを取得（旧形式は自動移行）
+        function getMedicineDoses() {
+            const raw = localStorage.getItem('medicineDoses');
+            if (raw) {
+                try {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr) && arr.length >= 1) return arr;
+                } catch (e) {}
+            }
+            return [
+                { key: 'morning', label: '朝', time: localStorage.getItem('medicineMorning') || '08:00', timing: 'other' },
+                { key: 'lunch', label: '昼', time: localStorage.getItem('medicineLunch') || '12:00', timing: 'other' },
+                { key: 'evening', label: '夕方', time: localStorage.getItem('medicineEvening') || '18:00', timing: 'other' },
+                { key: 'night', label: '夜', time: localStorage.getItem('medicineNight') || '21:00', timing: 'other' }
+            ];
+        }
+
+        function getTimingLabel(timing) {
+            return timing === 'before' ? '食前' : timing === 'after' ? '食後' : 'その他';
+        }
+
         // 薬の時間
         function showMedicine() {
             const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            const currentTime = hour * 60 + minute;
-            
-            // 設定から服薬時間を取得
-            const times = {
-                morning: localStorage.getItem('medicineMorning') || '08:00',
-                lunch: localStorage.getItem('medicineLunch') || '12:00',
-                evening: localStorage.getItem('medicineEvening') || '18:00',
-                night: localStorage.getItem('medicineNight') || '21:00'
-            };
-            
-            // 時間を分に変換
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const doses = getMedicineDoses();
             const timeToMinutes = (timeStr) => {
-                const [h, m] = timeStr.split(':').map(Number);
+                const [h, m] = (timeStr || '08:00').split(':').map(Number);
                 return h * 60 + m;
             };
-            
-            const morningMin = timeToMinutes(times.morning);
-            const lunchMin = timeToMinutes(times.lunch);
-            const eveningMin = timeToMinutes(times.evening);
-            const nightMin = timeToMinutes(times.night);
-            
-            // 日付表示
-            const dateStr = now.toLocaleDateString('ja-JP', { 
-                month: 'long', 
-                day: 'numeric',
-                weekday: 'short'
-            });
-            
+            const dateStr = now.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' });
+
             let message = '<h2 style="text-align: center;">💊 お薬の管理</h2>';
             message += `<p style="text-align: center; color: #666; margin-bottom: 20px;">${dateStr}</p>`;
-            
-            // 現在の服薬タイミングを判定（前後30分）
+
             let currentDose = null;
             let doseLabel = '';
-            
-            if (Math.abs(currentTime - morningMin) <= 30) {
-                currentDose = 'morning';
-                doseLabel = '朝';
-            } else if (Math.abs(currentTime - lunchMin) <= 30) {
-                currentDose = 'lunch';
-                doseLabel = '昼';
-            } else if (Math.abs(currentTime - eveningMin) <= 30) {
-                currentDose = 'evening';
-                doseLabel = '夕方';
-            } else if (Math.abs(currentTime - nightMin) <= 30) {
-                currentDose = 'night';
-                doseLabel = '夜';
+            for (let i = 0; i < doses.length; i++) {
+                const d = doses[i];
+                const min = timeToMinutes(d.time);
+                if (Math.abs(currentTime - min) <= 30) {
+                    currentDose = d.key;
+                    doseLabel = d.label + (d.timing !== 'other' ? '（' + getTimingLabel(d.timing) + '）' : '');
+                    break;
+                }
             }
-            
-            // 服薬時間の前後30分の場合
+
             if (currentDose) {
                 const today = now.toISOString().split('T')[0];
                 const recordKey = `medicine_${currentDose}_${today}`;
                 const taken = localStorage.getItem(recordKey);
-                
                 if (taken) {
                     message += `<div style="background: #d4edda; border: 2px solid #28a745; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                         <p style="font-size: 1.5em; text-align: center; color: #155724;">✅ ${doseLabel}のお薬</p>
@@ -657,40 +657,37 @@
                         <p style="font-size: 1.8em; text-align: center; color: #856404;">💊 ${doseLabel}のお薬</p>
                         <p style="font-size: 1.3em; text-align: center; color: #856404; margin-top: 10px;">飲みましたか？</p>
                     </div>`;
-                    
-                    message += `<button onclick="recordMedicine('${currentDose}', '${doseLabel}')" style="width: 100%; padding: 20px; font-size: 1.5em; background: #28a745; color: white; border: none; border-radius: 10px; margin-bottom: 10px; cursor: pointer;">
+                    message += `<button onclick="recordMedicine('${currentDose}')" style="width: 100%; padding: 20px; font-size: 1.5em; background: #28a745; color: white; border: none; border-radius: 10px; margin-bottom: 10px; cursor: pointer;">
                         ✅ 飲みました
                     </button>`;
                 }
             }
-            
-            // 今日の服薬記録を表示
+
             message += '<div style="margin-top: 30px;"><h3 style="text-align: center; margin-bottom: 15px;">今日の記録</h3>';
             message += getMedicineRecordHTML();
             message += '</div>';
-            
-            // 次の服薬時間を表示
+
             message += '<div style="margin-top: 30px; padding: 15px; background: #f8f9ff; border-radius: 10px;">';
             message += '<h3 style="text-align: center; margin-bottom: 10px;">本日の予定</h3>';
-            message += `<p style="text-align: center;">朝: ${times.morning}</p>`;
-            message += `<p style="text-align: center;">昼: ${times.lunch}</p>`;
-            message += `<p style="text-align: center;">夕方: ${times.evening}</p>`;
-            message += `<p style="text-align: center;">夜: ${times.night}</p>`;
+            doses.forEach(d => {
+                const t = d.timing !== 'other' ? '・' + getTimingLabel(d.timing) : '';
+                message += `<p style="text-align: center;">${d.label} ${d.time}${t}</p>`;
+            });
             message += '</div>';
-            
+
             showGeneralModal(message);
         }
         
         // 服薬記録
-        function recordMedicine(dose, label) {
+        function recordMedicine(doseKey) {
+            const doses = getMedicineDoses();
+            const d = doses.find(x => x.key === doseKey);
+            const label = d ? d.label + (d.timing !== 'other' ? '（' + getTimingLabel(d.timing) + '）' : '') : doseKey;
             const now = new Date();
             const today = now.toISOString().split('T')[0];
             const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-            const recordKey = `medicine_${dose}_${today}`;
-            
+            const recordKey = `medicine_${doseKey}_${today}`;
             localStorage.setItem(recordKey, timeStr);
-            
-            // 家族に通知するか確認
             const confirmNotify = confirm(`${label}のお薬を飲んだことを記録しました。\n\nご家族に通知しますか？`);
             
             if (confirmNotify) {
@@ -756,35 +753,25 @@
         
         // 今日の服薬記録HTML
         function getMedicineRecordHTML() {
-            const now = new Date();
-            const today = now.toISOString().split('T')[0];
-            
-            const doses = [
-                { key: 'morning', label: '朝', time: localStorage.getItem('medicineMorning') || '08:00' },
-                { key: 'lunch', label: '昼', time: localStorage.getItem('medicineLunch') || '12:00' },
-                { key: 'evening', label: '夕方', time: localStorage.getItem('medicineEvening') || '18:00' },
-                { key: 'night', label: '夜', time: localStorage.getItem('medicineNight') || '21:00' }
-            ];
-            
+            const today = new Date().toISOString().split('T')[0];
+            const doses = getMedicineDoses();
             let html = '<div style="display: grid; gap: 10px;">';
-            
-            doses.forEach(dose => {
-                const recordKey = `medicine_${dose.key}_${today}`;
+            doses.forEach(d => {
+                const recordKey = `medicine_${d.key}_${today}`;
                 const taken = localStorage.getItem(recordKey);
-                
+                const timingStr = d.timing !== 'other' ? '・' + getTimingLabel(d.timing) : '';
                 if (taken) {
                     html += `<div style="background: #d4edda; border: 1px solid #28a745; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 1.2em;">✅ ${dose.label}（${dose.time}）</span>
+                        <span style="font-size: 1.2em;">✅ ${d.label}（${d.time}${timingStr}）</span>
                         <span style="color: #155724; font-size: 0.9em;">${taken}</span>
                     </div>`;
                 } else {
                     html += `<div style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 1.2em; color: #999;">⭕ ${dose.label}（${dose.time}）</span>
+                        <span style="font-size: 1.2em; color: #999;">⭕ ${d.label}（${d.time}${timingStr}）</span>
                         <span style="color: #999; font-size: 0.9em;">未服薬</span>
                     </div>`;
                 }
             });
-            
             html += '</div>';
             return html;
         }
@@ -1029,61 +1016,33 @@
         // 服薬時間チェック関数
         function checkMedicineTime() {
             const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            const currentTime = hour * 60 + minute;
-            
-            // 設定から服薬時間を取得
-            const times = {
-                morning: localStorage.getItem('medicineMorning') || '08:00',
-                lunch: localStorage.getItem('medicineLunch') || '12:00',
-                evening: localStorage.getItem('medicineEvening') || '18:00',
-                night: localStorage.getItem('medicineNight') || '21:00'
-            };
-            
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const doses = getMedicineDoses();
             const timeToMinutes = (timeStr) => {
-                const [h, m] = timeStr.split(':').map(Number);
+                const [h, m] = (timeStr || '08:00').split(':').map(Number);
                 return h * 60 + m;
             };
-            
-            const morningMin = timeToMinutes(times.morning);
-            const lunchMin = timeToMinutes(times.lunch);
-            const eveningMin = timeToMinutes(times.evening);
-            const nightMin = timeToMinutes(times.night);
-            
             let currentDose = null;
             let doseLabel = '';
-            
-            // 前後30分以内かチェック
-            if (Math.abs(currentTime - morningMin) <= 30) {
-                currentDose = 'morning';
-                doseLabel = '朝';
-            } else if (Math.abs(currentTime - lunchMin) <= 30) {
-                currentDose = 'lunch';
-                doseLabel = '昼';
-            } else if (Math.abs(currentTime - eveningMin) <= 30) {
-                currentDose = 'evening';
-                doseLabel = '夕方';
-            } else if (Math.abs(currentTime - nightMin) <= 30) {
-                currentDose = 'night';
-                doseLabel = '夜';
+            for (let i = 0; i < doses.length; i++) {
+                const d = doses[i];
+                if (Math.abs(currentTime - timeToMinutes(d.time)) <= 30) {
+                    currentDose = d.key;
+                    doseLabel = d.label + (d.timing !== 'other' ? '（' + getTimingLabel(d.timing) + '）' : '');
+                    break;
+                }
             }
-            
-            // 服薬時間で、まだ飲んでいない場合
             if (currentDose) {
                 const today = now.toISOString().split('T')[0];
                 const recordKey = `medicine_${currentDose}_${today}`;
                 const taken = localStorage.getItem(recordKey);
                 const notifiedKey = `notified_${currentDose}_${today}`;
                 const alreadyNotified = localStorage.getItem(notifiedKey);
-                
                 if (!taken && !alreadyNotified) {
                     localStorage.setItem(notifiedKey, 'true');
-                    
-                    // 通知表示
                     setTimeout(() => {
                         if (confirm(`💊 ${doseLabel}のお薬の時間です。\n\nお薬を飲みましたか？`)) {
-                            recordMedicine(currentDose, doseLabel);
+                            recordMedicine(currentDose);
                         }
                     }, 1000);
                 }
