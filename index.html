@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>いつでもサポート - インストール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .app-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .step-content {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-left: 55px;
+        }
+
+        .device-specific {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .device-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            display: block;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .secondary-button {
+            background: white;
+            color: #667eea;
+            border: 3px solid #667eea;
+        }
+
+        .install-button {
+            display: none;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .feature-list {
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .feature-text {
+            flex: 1;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .platform-detector {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .platform-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ウェルカムカード -->
+        <div class="welcome-card">
+            <div class="app-icon">🏠</div>
+            <h1>いつでもサポート</h1>
+            <p class="subtitle">
+                認知症の方の日常生活をサポートする<br>
+                見当識支援アプリケーション
+            </p>
+
+            <!-- プラットフォーム検出 -->
+            <div class="platform-detector" id="platformInfo">
+                <div class="platform-icon" id="platformIcon">📱</div>
+                <div id="platformText">お使いのデバイスを確認中...</div>
+            </div>
+
+            <!-- インストールボタン（PWA対応ブラウザのみ表示） -->
+            <button class="button install-button" id="installButton">
+                📥 アプリをインストール
+            </button>
+
+            <!-- 主要ボタン -->
+            <button class="button primary-button" onclick="startSetup()">
+                🚀 今すぐ始める
+            </button>
+            
+            <button class="button secondary-button" onclick="showInstructions()">
+                📖 インストール方法を見る
+            </button>
+        </div>
+
+        <!-- 機能紹介 -->
+        <div class="step-card">
+            <div class="step-title">✨ 主な機能</div>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🕐</div>
+                    <div class="feature-text">今の時間と日付を大きく表示</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📍</div>
+                    <div class="feature-text">現在地を確認して家に帰るナビ</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📹</div>
+                    <div class="feature-text">退屈を和らげる動画視聴</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📸</div>
+                    <div class="feature-text">写真を撮って家族に送信</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💊</div>
+                    <div class="feature-text">お薬の時間をお知らせ</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-text">物を探すサポート</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📞</div>
+                    <div class="feature-text">家族にワンタッチで電話</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- インストール手順（非表示、ボタンクリックで表示） -->
+        <div id="instructionsSection" class="hidden">
+            <!-- iPhone/iPad向け -->
+            <div class="step-card" id="iosInstructions">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    iPhone/iPadでインストール
+                </div>
+                <div class="step-content">
+                    <div class="device-specific">
+                        <div class="device-name">📱 Safariで開いている場合</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>画面下部の共有ボタン <strong>□↑</strong> をタップ</li>
+                            <li>「ホーム画面に追加」をタップ</li>
+                            <li>「追加」をタップして完了</li>
+                        </ol>
+                    </div>
+                    <p style="margin-top: 15px; color: #999;">
+                        ※ Chrome等の他のブラウザをお使いの場合は、Safariで開き直してください
+                    </p>
+                </div>
+            </div>
+
+            <!-- Android向け -->
+            <div class="step-card" id="androidInstructions">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    Androidでインストール
+                </div>
+                <div class="step-content">
+                    <div class="device-specific">
+                        <div class="device-name">🤖 Chromeで開いている場合</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>画面上部に表示される「インストール」をタップ</li>
+                            <li>または、右上のメニュー ⋮ から「ホーム画面に追加」を選択</li>
+                            <li>「インストール」をタップして完了</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PC向け -->
+            <div class="step-card" id="pcInstructions">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    パソコンでインストール
+                </div>
+                <div class="step-content">
+                    <div class="device-specific">
+                        <div class="device-name">💻 Chrome/Edgeの場合</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>アドレスバー右側の「インストール」アイコンをクリック</li>
+                            <li>または、右上のメニューから「アプリをインストール」を選択</li>
+                            <li>「インストール」をクリックして完了</li>
+                        </ol>
+                    </div>
+                    <p style="margin-top: 15px; color: #999;">
+                        ※ アプリとして独立したウィンドウで使用できます
+                    </p>
+                </div>
+            </div>
+
+            <!-- 初期設定 -->
+            <div class="step-card">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    初期設定を行う
+                </div>
+                <div class="step-content">
+                    <p>アプリを開いたら、以下の情報を設定してください：</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 2;">
+                        <li>✅ お名前と自宅住所</li>
+                        <li>✅ 家族の連絡先（電話番号・メール）</li>
+                        <li>✅ かかりつけのクリニック情報</li>
+                        <li>✅ お薬を飲む時間</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 使い始める -->
+            <div class="step-card">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    さあ、使い始めましょう！
+                </div>
+                <div class="step-content">
+                    <p>ホーム画面のアイコンをタップすれば、いつでもアプリを起動できます。</p>
+                    <button class="button primary-button" onclick="startSetup()" style="margin-top: 20px;">
+                        🚀 設定を始める
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        
+        // プラットフォーム検出
+        function detectPlatform() {
+            const ua = navigator.userAgent;
+            const platform = navigator.platform;
+            let platformName = 'その他';
+            let platformIcon = '📱';
+            
+            if (/iPad|iPhone|iPod/.test(ua)) {
+                platformName = 'iPhone/iPad';
+                platformIcon = '📱';
+                document.getElementById('iosInstructions').style.display = 'block';
+                document.getElementById('androidInstructions').style.display = 'none';
+                document.getElementById('pcInstructions').style.display = 'none';
+            } else if (/Android/.test(ua)) {
+                platformName = 'Android';
+                platformIcon = '🤖';
+                document.getElementById('iosInstructions').style.display = 'none';
+                document.getElementById('androidInstructions').style.display = 'block';
+                document.getElementById('pcInstructions').style.display = 'none';
+            } else if (/Win|Mac|Linux/.test(platform)) {
+                platformName = 'パソコン';
+                platformIcon = '💻';
+                document.getElementById('iosInstructions').style.display = 'none';
+                document.getElementById('androidInstructions').style.display = 'none';
+                document.getElementById('pcInstructions').style.display = 'block';
+            }
+            
+            document.getElementById('platformIcon').textContent = platformIcon;
+            document.getElementById('platformText').innerHTML = `
+                <strong>${platformName}</strong>でご利用中<br>
+                <small style="color: #666;">このデバイスに最適な方法でインストールできます</small>
+            `;
+        }
+
+        // PWAインストール対応
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // インストールボタンを表示
+            const installButton = document.getElementById('installButton');
+            installButton.style.display = 'block';
+            
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        showSuccessMessage();
+                    }
+                    
+                    deferredPrompt = null;
+                    installButton.style.display = 'none';
+                }
+            });
+        });
+
+        // インストール済みの場合
+        window.addEventListener('appinstalled', () => {
+            showSuccessMessage();
+        });
+
+        // 成功メッセージ表示
+        function showSuccessMessage() {
+            const message = document.createElement('div');
+            message.className = 'success-message';
+            message.innerHTML = '✅ インストール完了！<br>ホーム画面から起動できます';
+            document.querySelector('.container').insertBefore(
+                message, 
+                document.querySelector('.welcome-card')
+            );
+            
+            setTimeout(() => {
+                startSetup();
+            }, 2000);
+        }
+
+        // インストール方法を表示
+        function showInstructions() {
+            document.getElementById('instructionsSection').classList.remove('hidden');
+            document.getElementById('instructionsSection').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // セットアップ開始
+        function startSetup() {
+            // 初回起動フラグを設定
+            localStorage.setItem('firstTime', 'true');
+            window.location.href = 'settings.html';
+        }
+
+        // 初期化
+        detectPlatform();
+        
+        // すでにインストール済みか確認
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            document.getElementById('platformInfo').innerHTML = `
+                <div class="platform-icon">✅</div>
+                <div><strong>アプリとして起動中</strong><br>
+                <small style="color: #666;">インストール済みです</small></div>
+            `;
+        }
+    </script>
+</body>
+</html>

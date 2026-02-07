@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - いつでもサポート</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .setting-group {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .setting-group:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .save-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .back-button {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .success-message {
+            display: none;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="pageTitle">⚙️ 設定</h1>
+        
+        <div class="success-message" id="successMessage">
+            設定を保存しました!
+        </div>
+
+        <form id="settingsForm">
+            <!-- 基本情報 -->
+            <div class="setting-group">
+                <h2>👤 基本情報</h2>
+                <label>お名前</label>
+                <input type="text" id="userName" placeholder="例：山田太郎">
+                
+                <label>自宅住所（家に帰る機能で使用）</label>
+                <input type="text" id="homeAddress" placeholder="例：東京都〇〇区〇〇1-2-3">
+            </div>
+
+            <!-- 家族連絡先 -->
+            <div class="setting-group">
+                <h2>📞 家族の連絡先</h2>
+                <label>家族1 - 名前</label>
+                <input type="text" id="family1Name" placeholder="例：山田花子">
+                
+                <label>家族1 - 電話番号</label>
+                <input type="tel" id="family1Phone" placeholder="例：090-1234-5678">
+                
+                <label>家族2 - 名前</label>
+                <input type="text" id="family2Name" placeholder="例：山田次郎">
+                
+                <label>家族2 - 電話番号</label>
+                <input type="tel" id="family2Phone" placeholder="例：090-8765-4321">
+                
+                <label>写真の送信先メールアドレス</label>
+                <input type="email" id="familyEmail" placeholder="例：family@example.com">
+            </div>
+
+            <!-- クリニック情報 -->
+            <div class="setting-group">
+                <h2>🏥 クリニック情報</h2>
+                <label>クリニック名</label>
+                <input type="text" id="clinicName" placeholder="例：脳とこころの石原クリニック" value="脳とこころの石原クリニック">
+                
+                <label>クリニック電話番号</label>
+                <input type="tel" id="clinicPhone" placeholder="例：022-123-4567">
+            </div>
+
+            <!-- 服薬時間 -->
+            <div class="setting-group">
+                <h2>💊 お薬の時間</h2>
+                <div class="time-inputs">
+                    <div>
+                        <label>朝</label>
+                        <input type="time" id="medicineMorning" value="08:00">
+                    </div>
+                    <div>
+                        <label>昼</label>
+                        <input type="time" id="medicineLunch" value="12:00">
+                    </div>
+                    <div>
+                        <label>夕方</label>
+                        <input type="time" id="medicineEvening" value="18:00">
+                    </div>
+                    <div>
+                        <label>夜</label>
+                        <input type="time" id="medicineNight" value="21:00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 送信方法のデフォルト -->
+            <div class="setting-group">
+                <h2>📤 写真の送信方法</h2>
+                <label>デフォルトの送信方法</label>
+                <select id="defaultSendMethod">
+                    <option value="ask">毎回選択する</option>
+                    <option value="line">LINE</option>
+                    <option value="email">メール</option>
+                </select>
+            </div>
+
+            <button type="submit" class="button save-button">💾 設定を保存</button>
+            <button type="button" class="button back-button" onclick="goBack()">🏠 アプリに戻る</button>
+        </form>
+    </div>
+
+    <script>
+        // 設定を読み込み
+        function loadSettings() {
+            const settings = {
+                userName: localStorage.getItem('userName') || '',
+                homeAddress: localStorage.getItem('homeAddress') || '',
+                family1Name: localStorage.getItem('family1Name') || '',
+                family1Phone: localStorage.getItem('family1Phone') || '',
+                family2Name: localStorage.getItem('family2Name') || '',
+                family2Phone: localStorage.getItem('family2Phone') || '',
+                familyEmail: localStorage.getItem('familyEmail') || '',
+                clinicName: localStorage.getItem('clinicName') || '脳とこころの石原クリニック',
+                clinicPhone: localStorage.getItem('clinicPhone') || '',
+                medicineMorning: localStorage.getItem('medicineMorning') || '08:00',
+                medicineLunch: localStorage.getItem('medicineLunch') || '12:00',
+                medicineEvening: localStorage.getItem('medicineEvening') || '18:00',
+                medicineNight: localStorage.getItem('medicineNight') || '21:00',
+                defaultSendMethod: localStorage.getItem('defaultSendMethod') || 'ask'
+            };
+
+            Object.keys(settings).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = settings[key];
+                }
+            });
+        }
+
+        // 設定を保存
+        document.getElementById('settingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const fields = [
+                'userName', 'homeAddress', 'family1Name', 'family1Phone',
+                'family2Name', 'family2Phone', 'familyEmail', 'clinicName',
+                'clinicPhone', 'medicineMorning', 'medicineLunch',
+                'medicineEvening', 'medicineNight', 'defaultSendMethod'
+            ];
+
+            fields.forEach(field => {
+                const value = document.getElementById(field).value;
+                localStorage.setItem(field, value);
+            });
+
+            // 初回起動の場合はメインアプリへ
+            const isFirstTime = localStorage.getItem('firstTime');
+            if (isFirstTime === 'true') {
+                localStorage.removeItem('firstTime');
+                alert('設定が完了しました！\nアプリを起動します。');
+                window.location.href = 'orientation-support-app.html';
+                return;
+            }
+
+            // 成功メッセージ表示
+            const message = document.getElementById('successMessage');
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+
+            // ページトップへスクロール
+            window.scrollTo(0, 0);
+        });
+
+        function goBack() {
+            window.location.href = 'orientation-support-app.html';
+        }
+
+        // 初期化
+        loadSettings();
+        
+        // 初回起動チェック
+        const isFirstTime = localStorage.getItem('firstTime');
+        if (isFirstTime === 'true') {
+            document.getElementById('pageTitle').textContent = '🚀 初期設定';
+            document.querySelector('.back-button').style.display = 'none';
+            
+            // 説明を追加
+            const intro = document.createElement('div');
+            intro.style.cssText = 'background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;';
+            intro.innerHTML = `
+                <p style="font-size: 1.2em; color: #1976d2; margin-bottom: 10px;">
+                    <strong>ようこそ！</strong>
+                </p>
+                <p style="color: #666;">
+                    アプリを使う前に、基本情報を登録しましょう。<br>
+                    後から変更することもできます。
+                </p>
+            `;
+            document.querySelector('.container').insertBefore(intro, document.getElementById('settingsForm'));
+        }
+    </script>
+</body>
+</html>
