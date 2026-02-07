@@ -252,6 +252,11 @@
                 <span>物を探す</span>
             </button>
 
+            <button class="action-button" onclick="showRememberList()" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
+                <span class="icon">📝</span>
+                <span>覚えておくこと</span>
+            </button>
+
             <button class="action-button call-button" onclick="callFamily()">
                 <span class="icon">📞</span>
                 <span>家族に電話</span>
@@ -275,7 +280,7 @@
                 2026-02-07
             </p>
             <p style="margin-top: 16px; font-size: 0.85em;">
-                <a id="lineAiLink" href="#" target="_blank" rel="noopener" style="color: #667eea;">AI石原先生へ相談</a>
+                <a id="lineAiLink" href="#" target="_blank" rel="noopener" style="color: #667eea;">AI石原先生へのLine相談はこちら</a>
             </p>
             <p style="margin-top: 4px; font-size: 0.7em; color: #888;">※AIのため正確でない可能性があります</p>
         </div>
@@ -309,7 +314,7 @@
         document.getElementById('headerVersion').textContent = 'Ver ' + APP_VERSION;
         document.getElementById('panelVersion').textContent = 'Version ' + APP_VERSION;
 
-        // AI石原先生へ相談（LINE公式アカウント等のURLを設定）
+        // AI石原先生へのLine相談はこちら（LINE公式アカウントURL）
         const LINE_AI_CONSULT_URL = 'https://lin.ee/7zY8dMP';
         var lineAiEl = document.getElementById('lineAiLink');
         if (lineAiEl) lineAiEl.href = LINE_AI_CONSULT_URL;
@@ -809,6 +814,79 @@
             
             // 最後に見つけた場所を表示
             updateLastFound();
+        }
+
+        // 覚えておくこと（メモ）
+        const REMEMBER_LIST_KEY = 'rememberList';
+        function getRememberList() {
+            try {
+                const raw = localStorage.getItem(REMEMBER_LIST_KEY);
+                if (raw) {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr)) return arr;
+                }
+            } catch (e) {}
+            return [];
+        }
+        function saveRememberList(list) {
+            localStorage.setItem(REMEMBER_LIST_KEY, JSON.stringify(list));
+        }
+        function showRememberList() {
+            const list = getRememberList();
+            let html = '<h2 style="text-align: center; margin-bottom: 15px;">📝 覚えておくこと</h2>';
+            html += '<p style="text-align: center; color: #666; font-size: 0.95em; margin-bottom: 15px;">メモや忘れないようにしたいことを追加・編集できます</p>';
+            if (list.length === 0) {
+                html += '<p style="text-align: center; color: #999; padding: 20px;">まだありません。「追加」で登録しましょう。</p>';
+            } else {
+                html += '<div style="display: grid; gap: 10px; margin-bottom: 15px;">';
+                list.forEach(function(item, i) {
+                    html += '<div style="background: #f8f9fa; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">';
+                    html += '<span style="flex: 1; word-break: break-all;">' + escapeHtml(item.text) + '</span>';
+                    html += '<span style="flex-shrink: 0;">';
+                    html += '<button onclick="editRememberItem(\'' + item.id + '\')" style="padding: 8px 14px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">編集</button> ';
+                    html += '<button onclick="deleteRememberItem(\'' + item.id + '\')" style="padding: 8px 14px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">削除</button>';
+                    html += '</span></div>';
+                });
+                html += '</div>';
+            }
+            html += '<button onclick="addRememberItem()" style="width: 100%; padding: 16px; font-size: 1.2em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer;">＋ 追加</button>';
+            showGeneralModal(html);
+        }
+        function escapeHtml(s) {
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+        function addRememberItem() {
+            const text = prompt('覚えておくことを入力してください：');
+            if (text == null || text.trim() === '') return;
+            const list = getRememberList();
+            list.push({ id: 'id_' + Date.now(), text: text.trim() });
+            saveRememberList(list);
+            showRememberList();
+        }
+        function editRememberItem(id) {
+            const list = getRememberList();
+            const item = list.find(function(x) { return x.id === id; });
+            if (!item) { showRememberList(); return; }
+            const text = prompt('内容を編集してください：', item.text);
+            if (text == null) return;
+            if (text.trim() === '') {
+                if (confirm('内容が空です。削除しますか？')) {
+                    saveRememberList(list.filter(function(x) { return x.id !== id; }));
+                }
+                showRememberList();
+                return;
+            }
+            item.text = text.trim();
+            saveRememberList(list);
+            showRememberList();
+        }
+        function deleteRememberItem(id) {
+            if (!confirm('この項目を削除しますか？')) return;
+            const list = getRememberList().filter(function(x) { return x.id !== id; });
+            saveRememberList(list);
+            showRememberList();
         }
         
         function updateLastFound() {
