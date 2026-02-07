@@ -339,6 +339,17 @@
                 <a id="lineAiLink" href="#" target="_blank" rel="noopener" style="color: #667eea;">AI石原先生へのLine相談はこちら</a>
             </p>
             <p style="margin-top: 4px; font-size: 0.7em; color: #888;">※AIのため正確でない可能性があります</p>
+
+            <!-- アプリの更新（QRコードの下） -->
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3);">
+                <p style="font-size: 0.9em; margin-bottom: 8px;">🔄 アプリの更新</p>
+                <p style="font-size: 0.85em; margin-bottom: 8px;">現在: <strong id="mainAppVersionDisplay">--</strong></p>
+                <div id="mainUpdateButtonArea" style="display: none;">
+                    <p style="font-size: 0.8em; color: #ffcc80; margin-bottom: 8px;">新しいバージョンが利用可能です</p>
+                    <button type="button" onclick="loadNewVersion()" style="width: 100%; padding: 12px; font-size: 1em; border-radius: 10px; border: none; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; cursor: pointer;">🔄 最新バージョンで読み込む</button>
+                </div>
+                <p id="mainAlreadyLatestMessage" style="font-size: 0.85em; color: #a5d6a7; display: none;">最新版をご利用中です</p>
+            </div>
         </div>
     </div>
 
@@ -374,6 +385,44 @@
         const LINE_AI_CONSULT_URL = 'https://lin.ee/7zY8dMP';
         var lineAiEl = document.getElementById('lineAiLink');
         if (lineAiEl) lineAiEl.href = LINE_AI_CONSULT_URL;
+
+        // アプリの更新（配布中の最新バージョン＝APP_VERSIONと合わせる）
+        const RELEASED_VERSION = '1.1.2';
+        function isNewerVersion(released, current) {
+            if (!current) return true;
+            var r = released.split('.').map(Number);
+            var c = current.split('.').map(Number);
+            for (var i = 0; i < Math.max(r.length, c.length); i++) {
+                var rn = r[i] || 0, cn = c[i] || 0;
+                if (rn > cn) return true;
+                if (rn < cn) return false;
+            }
+            return false;
+        }
+        function loadNewVersion() {
+            var mainUrl = 'orientation-support-app.html?nocache=' + Date.now();
+            if ('caches' in window) {
+                caches.keys().then(function(keys) {
+                    return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                }).then(function() { window.location.href = mainUrl; }).catch(function() { window.location.href = mainUrl; });
+            } else {
+                window.location.href = mainUrl;
+            }
+        }
+        (function() {
+            var current = localStorage.getItem('appVersion') || '';
+            var el = document.getElementById('mainAppVersionDisplay');
+            if (el) el.textContent = current || '（不明）';
+            var area = document.getElementById('mainUpdateButtonArea');
+            var latestMsg = document.getElementById('mainAlreadyLatestMessage');
+            if (isNewerVersion(RELEASED_VERSION, current)) {
+                if (area) area.style.display = 'block';
+                if (latestMsg) latestMsg.style.display = 'none';
+            } else {
+                if (area) area.style.display = 'none';
+                if (latestMsg) latestMsg.style.display = 'block';
+            }
+        })();
 
         // 時刻更新
         function updateTime() {
