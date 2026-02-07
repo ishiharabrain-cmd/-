@@ -166,6 +166,14 @@
                 <div id="medicineDosesContainer"></div>
             </div>
 
+            <!-- 動画を見る：お気に入り検索ワード -->
+            <div class="setting-group">
+                <h2>📹 動画を見る</h2>
+                <label>お気に入りYouTube検索ワード</label>
+                <input type="text" id="youtubeSearchKeyword" placeholder="例：懐かしい歌、癒しの音楽">
+                <p style="color: #666; font-size: 0.9em; margin-top: 4px;">「動画を見る」でこのワードをすぐ検索できます。空欄の場合は自由入力です。</p>
+            </div>
+
             <!-- 送信方法のデフォルト -->
             <div class="setting-group">
                 <h2>📤 写真の送信方法</h2>
@@ -301,6 +309,7 @@
                 familyEmail: localStorage.getItem('familyEmail') || '',
                 clinicName: localStorage.getItem('clinicName') || '脳とこころの石原クリニック',
                 clinicPhone: localStorage.getItem('clinicPhone') || '',
+                youtubeSearchKeyword: localStorage.getItem('youtubeSearchKeyword') || '',
                 defaultSendMethod: localStorage.getItem('defaultSendMethod') || 'ask'
             };
 
@@ -325,7 +334,7 @@
             const fields = [
                 'userName', 'homeAddress', 'family1Name', 'family1Phone',
                 'family2Name', 'family2Phone', 'familyEmail', 'clinicName',
-                'clinicPhone', 'defaultSendMethod'
+                'clinicPhone', 'youtubeSearchKeyword', 'defaultSendMethod'
             ];
 
             fields.forEach(field => {
