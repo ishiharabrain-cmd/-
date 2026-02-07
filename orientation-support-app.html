@@ -599,7 +599,7 @@
             var subject = '【いつでもサポート】' + userName + 'さんが家に帰ります';
             var body = userName + 'さんが今から家に帰ります。\n\n自宅: ' + homeAddress;
             if (loc.link) {
-                body += '\n\n【現在地】\n' + loc.coords + '\n地図で見る: ' + loc.link;
+                body += '\n\n【本人の現在地】\n' + loc.coords + '\n地図で見る: ' + loc.link;
             }
             body += '\n\n※このメールは「いつでもサポート」アプリから送信されています。';
             window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -610,7 +610,7 @@
             var loc = getCurrentLocationMapLink();
             var text = userName + 'さんが今から家に帰ります。自宅: ' + homeAddress + ' 🏠';
             if (loc.link) {
-                text += '\n【現在地】' + loc.coords + '\n' + loc.link;
+                text += '\n【本人の現在地】' + loc.coords + '\n' + loc.link;
             }
             window.open('https://line.me/R/share?text=' + encodeURIComponent(text), '_blank');
         }
