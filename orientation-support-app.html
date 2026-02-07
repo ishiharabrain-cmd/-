@@ -267,6 +267,9 @@
                     <div class="loading">位置情報を取得中...</div>
                 </div>
             </div>
+            <div class="weather-display" id="weatherDisplay" style="text-align: center; padding: 12px; background: #f0f4ff; border-radius: 12px; margin-top: 12px; font-size: 0.95em;">
+                <span style="color:#999;">—</span>
+            </div>
         </div>
 
         <!-- アクションボタン -->
@@ -440,48 +443,58 @@
                                 </button>
                             `;
                         }
+                        updateWeather(lat, lon);
                     },
                     (error) => {
-                        let errorMessage = '';
-                        let helpText = '';
-                        
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = '位置情報の使用が許可されていません';
-                                helpText = `
-                                    <div style="text-align: left; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px;">
-                                        <strong style="color: #856404;">📍 許可する方法：</strong><br>
-                                        <ol style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                                            <li>アドレスバーの🔒マークをタップ</li>
-                                            <li>「位置情報」を「許可」に変更</li>
-                                            <li>画面を下に引っ張って更新</li>
-                                        </ol>
-                                    </div>
-                                `;
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = '位置情報を取得できません';
-                                helpText = '<small style="color: #999;">デバイスの位置情報サービスを確認してください</small>';
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = '位置情報の取得がタイムアウトしました';
-                                helpText = '<small style="color: #999;">もう一度お試しください</small>';
-                                break;
-                        }
-                        
                         document.getElementById('locationText').innerHTML = `
-                            <strong style="color: #f5576c;">${errorMessage}</strong><br>
-                            ${helpText}
-                            <button onclick="openMapsApp()" style="margin-top: 15px; padding: 12px 20px; background: #4285F4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; width: 100%;">
+                            <span style="color: #666;">位置情報は利用できません</span><br>
+                            <button onclick="openMapsApp()" style="margin-top: 10px; padding: 12px 20px; background: #4285F4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; width: 100%;">
                                 🗺️ 地図アプリで現在地を確認
                             </button>
-                            <button onclick="updateLocation()" style="margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; width: 100%;">
-                                🔄 再取得
-                            </button>
                         `;
+                        document.getElementById('weatherDisplay').innerHTML = '<span style="color:#999;">—</span>';
                     },
-                    options  // オプションを追加
+                    options
                 );
+            }
+        }
+
+        // 天気・気温・服装アドバイス（Open-Meteo）
+        function weatherCodeToLabel(code) {
+            if (code === 0) return '晴れ';
+            if (code >= 1 && code <= 3) return '曇り';
+            if (code === 45 || code === 48) return '霧';
+            if (code >= 51 && code <= 67) return '雨';
+            if (code >= 71 && code <= 77) return '雪';
+            if (code >= 80 && code <= 82) return 'にわか雨';
+            if (code >= 85 && code <= 86) return 'にわか雪';
+            if (code === 95) return '雷雨';
+            return '—';
+        }
+        function getClothingAdvice(temp) {
+            if (temp >= 28) return '暑いので薄着で';
+            if (temp >= 25) return '半袖でOK';
+            if (temp >= 20) return '長袖が安心';
+            if (temp >= 15) return '上着があると良い';
+            if (temp >= 10) return '暖かくして';
+            if (temp >= 5) return 'コート推奨';
+            return '防寒を';
+        }
+        async function updateWeather(lat, lon) {
+            const el = document.getElementById('weatherDisplay');
+            if (!el) return;
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=Asia/Tokyo`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (!data.current) { el.innerHTML = '<span style="color:#999;">—</span>'; return; }
+                const temp = Math.round(data.current.temperature_2m);
+                const code = data.current.weather_code || 0;
+                const weatherLabel = weatherCodeToLabel(code);
+                const advice = getClothingAdvice(temp);
+                el.innerHTML = '<strong>🌤 天気</strong> ' + weatherLabel + '　<strong>🌡 気温</strong> ' + temp + '°C<br><span style="color:#555;">👕 ' + advice + '</span>';
+            } catch (e) {
+                el.innerHTML = '<span style="color:#999;">—</span>';
             }
         }
 
@@ -502,20 +515,20 @@
             }
         }
 
-        // 動画を見る
+        // 動画を見る（設定で登録した検索ワードを利用可能）
         function watchVideo() {
+            const fav = (localStorage.getItem('youtubeSearchKeyword') || '').trim();
             const message = `
                 <h2 style="text-align: center;">📹 動画を見る</h2>
-                <p style="font-size: 1.3em; text-align: center; margin: 20px 0;">
-                    どんな動画を見ますか？
-                </p>
-                <input type="text" id="videoSearch" placeholder="見たい動画を入力" style="width: 100%; padding: 15px; font-size: 1.2em; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 10px;">
-                <button onclick="searchYouTube()" style="width: 100%; padding: 15px; font-size: 1.3em; border-radius: 10px; border: none; background: #fa709a; color: white; cursor: pointer; margin-bottom: 20px;">🔍 検索する</button>
+                <p style="font-size: 1.1em; text-align: center; margin: 15px 0; color: #666;">見たい動画のワードを入力するか、下のボタンで検索</p>
+                <input type="text" id="videoSearch" value="${fav ? fav.replace(/"/g, '&quot;') : ''}" placeholder="見たい動画を入力" style="width: 100%; padding: 15px; font-size: 1.2em; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 10px;">
+                <button onclick="searchYouTube()" style="width: 100%; padding: 15px; font-size: 1.3em; border-radius: 10px; border: none; background: #fa709a; color: white; cursor: pointer; margin-bottom: 10px;">🔍 検索する</button>
+                ${fav ? '<button type="button" data-search="' + escapeAttr(fav) + '" onclick="playYouTube(this.getAttribute(\'data-search\'))" style="width: 100%; padding: 14px; font-size: 1.2em; border-radius: 10px; border: none; background: #e0c3fc; color: #333; cursor: pointer; margin-bottom: 15px;">⭐ お気に入りで検索</button>' : ''}
                 <div style="display: grid; gap: 10px;">
-                    <button onclick="playYouTube('癒しの音楽')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🎵 癒しの音楽</button>
-                    <button onclick="playYouTube('懐かしい歌')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🎤 懐かしい歌</button>
-                    <button onclick="playYouTube('自然の映像')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🌿 自然の映像</button>
-                    <button onclick="playYouTube('猫の動画')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🐱 猫の動画</button>
+                    <button onclick="playYouTube(\'癒しの音楽\')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🎵 癒しの音楽</button>
+                    <button onclick="playYouTube(\'懐かしい歌\')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🎤 懐かしい歌</button>
+                    <button onclick="playYouTube(\'自然の映像\')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🌿 自然の映像</button>
+                    <button onclick="playYouTube(\'猫の動画\')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🐱 猫の動画</button>
                 </div>
             `;
             showGeneralModal(message);
@@ -529,6 +542,7 @@
         }
 
         function playYouTube(query) {
+            if (!query) return;
             const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
             window.open(youtubeUrl, '_blank');
             closeGeneralModal();
