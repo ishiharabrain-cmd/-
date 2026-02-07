@@ -205,6 +205,50 @@
             cursor: pointer;
             width: 100%;
         }
+
+        .remember-section {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .remember-section h3 {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remember-list-preview {
+            max-height: 7.5em;
+            overflow-y: auto;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        .remember-list-preview .remember-row {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .remember-list-preview .remember-row:last-child { border-bottom: none; }
+        .remember-list-preview .remember-row.in-progress {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .remember-more {
+            margin-top: 8px;
+            text-align: center;
+        }
+        .remember-more button {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -232,6 +276,20 @@
                 <span>家に帰る</span>
             </button>
 
+        <!-- 覚えておくこと（家に帰るの下・一覧表示） -->
+        <div class="remember-section">
+            <h3>
+                <span>📝 覚えておくこと</span>
+                <button type="button" onclick="showRememberList()" style="background:#667eea;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:0.85em;cursor:pointer;">編集</button>
+            </h3>
+            <div id="rememberListPreview" class="remember-list-preview">
+                <!-- JSで描画 -->
+            </div>
+            <div id="rememberMoreArea" class="remember-more" style="display:none;">
+                <button type="button" onclick="showRememberList()">5件以上あります。タップして全て見る</button>
+            </div>
+        </div>
+
             <button class="action-button video-button" onclick="watchVideo()">
                 <span class="icon">📹</span>
                 <span>動画を見る</span>
@@ -250,11 +308,6 @@
             <button class="action-button find-button" onclick="findThings()">
                 <span class="icon">🔍</span>
                 <span>物を探す</span>
-            </button>
-
-            <button class="action-button" onclick="showRememberList()" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
-                <span class="icon">📝</span>
-                <span>覚えておくこと</span>
             </button>
 
             <button class="action-button call-button" onclick="callFamily()">
@@ -816,77 +869,199 @@
             updateLastFound();
         }
 
-        // 覚えておくこと（メモ）
+        // 覚えておくこと（メモ）remindAt: "YYYY-MM-DDTHH:mm", endAt: 同様（省略時は開始+1h）
         const REMEMBER_LIST_KEY = 'rememberList';
+        const REMEMBER_REMINDED_KEY = 'rememberReminded';
         function getRememberList() {
             try {
                 const raw = localStorage.getItem(REMEMBER_LIST_KEY);
                 if (raw) {
                     const arr = JSON.parse(raw);
-                    if (Array.isArray(arr)) return arr;
+                    if (Array.isArray(arr)) return arr.map(function(it) {
+                        if (!it.remindAt && (it.remindDate || it.remindTime)) {
+                            it.remindAt = (it.remindDate || '').trim() && (it.remindTime || '').trim() ? (it.remindDate + 'T' + it.remindTime) : null;
+                        }
+                        return it;
+                    });
                 }
             } catch (e) {}
             return [];
         }
         function saveRememberList(list) {
             localStorage.setItem(REMEMBER_LIST_KEY, JSON.stringify(list));
+            renderRememberPreview();
+        }
+        function isRememberItemInProgress(item) {
+            if (!item.remindAt) return false;
+            var start = parseRememberDateTime(item.remindAt);
+            if (!start || isNaN(start)) return false;
+            var endMs = item.endAt ? (parseRememberDateTime(item.endAt) || 0) : (start + 60 * 60 * 1000);
+            var now = Date.now();
+            return now >= start && now < endMs;
+        }
+        function parseRememberDateTime(s) {
+            if (!s || typeof s !== 'string') return NaN;
+            var d = new Date(s.replace('T', ' '));
+            return isNaN(d.getTime()) ? NaN : d.getTime();
+        }
+        function formatRememberDateTime(s) {
+            if (!s) return '';
+            var d = new Date(s.replace('T', ' '));
+            if (isNaN(d.getTime())) return s;
+            return d.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        function renderRememberPreview() {
+            var list = getRememberList();
+            var el = document.getElementById('rememberListPreview');
+            var moreEl = document.getElementById('rememberMoreArea');
+            if (!el) return;
+            if (list.length === 0) {
+                el.innerHTML = '<p style="color:#999;margin:0;">まだありません。編集から追加できます。</p>';
+                if (moreEl) moreEl.style.display = 'none';
+                return;
+            }
+            var showCount = 5;
+            var inProgress = list.filter(isRememberItemInProgress);
+            var rows = [];
+            list.slice(0, showCount).forEach(function(item) {
+                var isProg = isRememberItemInProgress(item);
+                var timeStr = item.remindAt ? ' <span style="color:#666;font-size:0.9em;">(' + formatRememberDateTime(item.remindAt) + ')</span>' : '';
+                rows.push('<div class="remember-row' + (isProg ? ' in-progress' : '') + '">' + escapeHtml(item.text) + timeStr + '</div>');
+            });
+            el.innerHTML = rows.join('');
+            if (moreEl) {
+                moreEl.style.display = list.length > showCount ? 'block' : 'none';
+            }
         }
         function showRememberList() {
-            const list = getRememberList();
-            let html = '<h2 style="text-align: center; margin-bottom: 15px;">📝 覚えておくこと</h2>';
-            html += '<p style="text-align: center; color: #666; font-size: 0.95em; margin-bottom: 15px;">メモや忘れないようにしたいことを追加・編集できます</p>';
+            var list = getRememberList();
+            var html = '<h2 style="text-align: center; margin-bottom: 15px;">📝 覚えておくこと</h2>';
+            html += '<p style="text-align: center; color: #666; font-size: 0.95em; margin-bottom: 15px;">メモとリマインド日時（任意）を追加・編集できます。30分前と開始時に通知します。</p>';
             if (list.length === 0) {
                 html += '<p style="text-align: center; color: #999; padding: 20px;">まだありません。「追加」で登録しましょう。</p>';
             } else {
                 html += '<div style="display: grid; gap: 10px; margin-bottom: 15px;">';
-                list.forEach(function(item, i) {
-                    html += '<div style="background: #f8f9fa; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">';
-                    html += '<span style="flex: 1; word-break: break-all;">' + escapeHtml(item.text) + '</span>';
+                list.forEach(function(item) {
+                    var isProg = isRememberItemInProgress(item);
+                    var timeStr = item.remindAt ? ' <span style="font-size:0.9em;color:#666;">' + formatRememberDateTime(item.remindAt) + '</span>' : '';
+                    html += '<div style="background:' + (isProg ? '#ffebee' : '#f8f9fa') + '; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-left: 4px solid ' + (isProg ? '#c62828' : '#ddd') + ';">';
+                    html += '<span style="flex: 1; word-break: break-all;">' + escapeHtml(item.text) + timeStr + '</span>';
                     html += '<span style="flex-shrink: 0;">';
-                    html += '<button onclick="editRememberItem(\'' + item.id + '\')" style="padding: 8px 14px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">編集</button> ';
-                    html += '<button onclick="deleteRememberItem(\'' + item.id + '\')" style="padding: 8px 14px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">削除</button>';
+                    html += '<button onclick="editRememberItem(\'' + escapeAttr(item.id) + '\')" style="padding: 8px 14px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">編集</button> ';
+                    html += '<button onclick="deleteRememberItem(\'' + escapeAttr(item.id) + '\')" style="padding: 8px 14px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9em;">削除</button>';
                     html += '</span></div>';
                 });
                 html += '</div>';
             }
-            html += '<button onclick="addRememberItem()" style="width: 100%; padding: 16px; font-size: 1.2em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer;">＋ 追加</button>';
+            html += '<button onclick="showAddRememberForm()" style="width: 100%; padding: 16px; font-size: 1.2em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer;">＋ 追加</button>';
             showGeneralModal(html);
         }
         function escapeHtml(s) {
-            const div = document.createElement('div');
+            if (s == null) return '';
+            var div = document.createElement('div');
             div.textContent = s;
             return div.innerHTML;
         }
+        function escapeAttr(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        function showAddRememberForm() {
+            closeGeneralModal();
+            var html = '<h2 style="text-align: center; margin-bottom: 15px;">📝 追加</h2>';
+            html += '<label style="display:block; margin-bottom: 4px;">内容</label>';
+            html += '<input type="text" id="newRememberText" placeholder="覚えておくこと" style="width:100%; padding:12px; margin-bottom:12px; border-radius:8px; border:2px solid #ddd; font-size:1em;">';
+            html += '<label style="display:block; margin-bottom: 4px;">リマインド日時（任意）</label>';
+            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">';
+            html += '<input type="date" id="newRememberDate" style="padding:10px; border-radius:8px; border:2px solid #ddd;">';
+            html += '<input type="time" id="newRememberTime" style="padding:10px; border-radius:8px; border:2px solid #ddd;">';
+            html += '</div>';
+            html += '<p style="font-size:0.85em; color:#666; margin-bottom:15px;">30分前と開始時に通知します。未入力の場合はメモのみです。</p>';
+            html += '<button onclick="submitAddRemember()" style="width:100%; padding:16px; background:#28a745; color:white; border:none; border-radius:10px; font-size:1.1em; cursor:pointer;">登録</button>';
+            html += '<button onclick="showRememberList()" style="width:100%; padding:12px; margin-top:8px; background:#f0f0f0; color:#333; border:none; border-radius:10px; cursor:pointer;">キャンセル</button>';
+            showGeneralModal(html);
+            var d = new Date();
+            document.getElementById('newRememberDate').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            document.getElementById('newRememberTime').value = '09:00';
+        }
+        function submitAddRemember() {
+            var text = (document.getElementById('newRememberText') && document.getElementById('newRememberText').value || '').trim();
+            if (!text) { alert('内容を入力してください。'); return; }
+            var date = (document.getElementById('newRememberDate') && document.getElementById('newRememberDate').value || '').trim();
+            var time = (document.getElementById('newRememberTime') && document.getElementById('newRememberTime').value || '').trim();
+            var remindAt = (date && time) ? (date + 'T' + time) : null;
+            var list = getRememberList();
+            list.push({ id: 'id_' + Date.now(), text: text, remindAt: remindAt });
+            saveRememberList(list);
+            showRememberList();
+        }
         function addRememberItem() {
-            const text = prompt('覚えておくことを入力してください：');
-            if (text == null || text.trim() === '') return;
-            const list = getRememberList();
-            list.push({ id: 'id_' + Date.now(), text: text.trim() });
+            showAddRememberForm();
+        }
+        function showEditRememberForm(id) {
+            var list = getRememberList();
+            var item = list.find(function(x) { return x.id === id; });
+            if (!item) { showRememberList(); return; }
+            var parts = (item.remindAt || '').split('T');
+            var date = (parts[0] || '').trim();
+            var time = (parts[1] || '').trim();
+            closeGeneralModal();
+            var html = '<h2 style="text-align: center; margin-bottom: 15px;">📝 編集</h2>';
+            html += '<label style="display:block; margin-bottom: 4px;">内容</label>';
+            html += '<input type="text" id="editRememberText" value="' + escapeAttr(item.text) + '" style="width:100%; padding:12px; margin-bottom:12px; border-radius:8px; border:2px solid #ddd; font-size:1em;">';
+            html += '<label style="display:block; margin-bottom: 4px;">リマインド日時（任意）</label>';
+            html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">';
+            html += '<input type="date" id="editRememberDate" value="' + escapeAttr(date) + '" style="padding:10px; border-radius:8px; border:2px solid #ddd;">';
+            html += '<input type="time" id="editRememberTime" value="' + escapeAttr(time) + '" style="padding:10px; border-radius:8px; border:2px solid #ddd;">';
+            html += '</div>';
+            html += '<button onclick="submitEditRemember(\'' + escapeAttr(id) + '\')" style="width:100%; padding:16px; background:#28a745; color:white; border:none; border-radius:10px; font-size:1.1em; cursor:pointer;">保存</button>';
+            html += '<button onclick="showRememberList()" style="width:100%; padding:12px; margin-top:8px; background:#f0f0f0; color:#333; border:none; border-radius:10px; cursor:pointer;">キャンセル</button>';
+            showGeneralModal(html);
+        }
+        function submitEditRemember(id) {
+            var text = (document.getElementById('editRememberText') && document.getElementById('editRememberText').value || '').trim();
+            if (!text) { alert('内容を入力してください。'); return; }
+            var date = (document.getElementById('editRememberDate') && document.getElementById('editRememberDate').value || '').trim();
+            var time = (document.getElementById('editRememberTime') && document.getElementById('editRememberTime').value || '').trim();
+            var remindAt = (date && time) ? (date + 'T' + time) : null;
+            var list = getRememberList();
+            var item = list.find(function(x) { return x.id === id; });
+            if (!item) { showRememberList(); return; }
+            item.text = text;
+            item.remindAt = remindAt;
             saveRememberList(list);
             showRememberList();
         }
         function editRememberItem(id) {
-            const list = getRememberList();
-            const item = list.find(function(x) { return x.id === id; });
-            if (!item) { showRememberList(); return; }
-            const text = prompt('内容を編集してください：', item.text);
-            if (text == null) return;
-            if (text.trim() === '') {
-                if (confirm('内容が空です。削除しますか？')) {
-                    saveRememberList(list.filter(function(x) { return x.id !== id; }));
-                }
-                showRememberList();
-                return;
-            }
-            item.text = text.trim();
-            saveRememberList(list);
-            showRememberList();
+            showEditRememberForm(id);
         }
         function deleteRememberItem(id) {
             if (!confirm('この項目を削除しますか？')) return;
-            const list = getRememberList().filter(function(x) { return x.id !== id; });
+            var list = getRememberList().filter(function(x) { return x.id !== id; });
             saveRememberList(list);
             showRememberList();
+        }
+        function checkRememberReminders() {
+            var list = getRememberList();
+            var now = Date.now();
+            var key30 = localStorage.getItem(REMEMBER_REMINDED_KEY) || '{}';
+            try { key30 = JSON.parse(key30); } catch (e) { key30 = {}; }
+            list.forEach(function(item) {
+                if (!item.remindAt) return;
+                var start = parseRememberDateTime(item.remindAt);
+                if (isNaN(start)) return;
+                var endMs = item.endAt ? (parseRememberDateTime(item.endAt) || 0) : (start + 60 * 60 * 1000);
+                var k = item.id + '_' + item.remindAt;
+                if (now >= start - 30 * 60 * 1000 && now < start - 25 * 60 * 1000 && !key30[k + '_30']) {
+                    key30[k + '_30'] = true;
+                    alert('【30分前】\n' + item.text);
+                }
+                if (now >= start && now < start + 5 * 60 * 1000 && !key30[k + '_start']) {
+                    key30[k + '_start'] = true;
+                    alert('【開始】\n' + item.text);
+                }
+            });
+            localStorage.setItem(REMEMBER_REMINDED_KEY, JSON.stringify(key30));
         }
         
         function updateLastFound() {
@@ -1086,6 +1261,11 @@
         updateLocation();
         setInterval(updateTime, 1000);
         setInterval(updateLocation, 60000); // 1分ごとに位置情報更新
+
+        renderRememberPreview();
+        setInterval(renderRememberPreview, 60000); // 1分ごとに進行中（赤）を更新
+        checkRememberReminders();
+        setInterval(checkRememberReminders, 60 * 1000); // 1分ごとにリマインド確認
 
         // 服薬時間チェック（起動時と10分ごと）
         checkMedicineTime();
