@@ -130,7 +130,7 @@ https://あなたのユーザー名.github.io/ishiharabrain-cmd/orientation-supp
 
 ## ⚙️ manifest.jsonの設定
 
-Version 1.1.1から、PWAのstart_urlを以下に変更しました：
+Version 1.1.2から、PWAのstart_urlを以下に変更しました：
 
 ```json
 "start_url": "orientation-support-app.html"

@@ -184,12 +184,57 @@
                 </select>
             </div>
 
+            <!-- アプリの更新 -->
+            <div class="setting-group" id="updateSection">
+                <h2>🔄 アプリの更新</h2>
+                <p style="color: #666; margin-bottom: 10px;">現在のバージョン: <strong id="currentVersionDisplay">--</strong></p>
+                <div id="updateButtonArea" style="display: none;">
+                    <p style="color: #e65100; margin-bottom: 10px; font-size: 0.95em;">新しいバージョンが利用可能です。</p>
+                    <button type="button" class="button" id="reloadNewVersionBtn" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white;">
+                        🔄 最新バージョンで読み込む
+                    </button>
+                </div>
+                <p id="alreadyLatestMessage" style="color: #2e7d32; margin-top: 8px; font-size: 0.9em; display: none;">最新版をご利用中です。</p>
+            </div>
+
             <button type="submit" class="button save-button">💾 設定を保存</button>
             <button type="button" class="button back-button" onclick="goBack()">🏠 アプリに戻る</button>
         </form>
     </div>
 
     <script>
+        // 配布中の最新バージョン（リリース時にこの値とメインアプリの APP_VERSION を合わせる）
+        const RELEASED_VERSION = '1.1.2';
+
+        // バージョン比較（released の方が新しければ true）
+        function isNewerVersion(released, current) {
+            if (!current) return true;
+            const r = released.split('.').map(Number);
+            const c = current.split('.').map(Number);
+            for (let i = 0; i < Math.max(r.length, c.length); i++) {
+                const rn = r[i] || 0, cn = c[i] || 0;
+                if (rn > cn) return true;
+                if (rn < cn) return false;
+            }
+            return false;
+        }
+
+        // 最新バージョンで読み込む（キャッシュを無視してメインアプリを再読み込み）
+        function loadNewVersion() {
+            const mainUrl = 'orientation-support-app.html?nocache=' + Date.now();
+            if ('caches' in window) {
+                caches.keys().then(function(keys) {
+                    return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+                }).then(function() {
+                    window.location.href = mainUrl;
+                }).catch(function() {
+                    window.location.href = mainUrl;
+                });
+            } else {
+                window.location.href = mainUrl;
+            }
+        }
+
         // 設定を読み込み
         function loadSettings() {
             const settings = {
@@ -257,6 +302,24 @@
 
         // 初期化
         loadSettings();
+
+        // バージョン表示と更新ボタンの表示制御
+        (function() {
+            var current = localStorage.getItem('appVersion') || '';
+            var el = document.getElementById('currentVersionDisplay');
+            if (el) el.textContent = current || '（不明）';
+            var area = document.getElementById('updateButtonArea');
+            var latestMsg = document.getElementById('alreadyLatestMessage');
+            if (isNewerVersion(RELEASED_VERSION, current)) {
+                if (area) area.style.display = 'block';
+                if (latestMsg) latestMsg.style.display = 'none';
+            } else {
+                if (area) area.style.display = 'none';
+                if (latestMsg) latestMsg.style.display = 'block';
+            }
+            var btn = document.getElementById('reloadNewVersionBtn');
+            if (btn) btn.addEventListener('click', loadNewVersion);
+        })();
         
         // 初回起動チェック
         const isFirstTime = localStorage.getItem('firstTime');

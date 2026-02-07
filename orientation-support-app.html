@@ -214,7 +214,7 @@
             <div class="time-display">
                 <div class="current-time" id="currentTime">--:--</div>
                 <div class="current-date" id="currentDate">----年--月--日</div>
-                <div style="margin-top: 10px; font-size: 0.9em; color: #999;">Ver 1.1.1</div>
+                <div id="headerVersion" style="margin-top: 10px; font-size: 0.9em; color: #999;">Ver 1.1.1</div>
             </div>
             
             <div class="location-display">
@@ -268,7 +268,7 @@
             <button onclick="showQRCode()" style="background: white; border: 2px solid #667eea; color: #667eea; padding: 15px 30px; border-radius: 10px; font-size: 1.2em; cursor: pointer; width: 100%;">
                 📱 QRコードを表示
             </button>
-            <p style="margin-top: 15px; color: white; font-size: 1.1em; font-weight: bold;">
+            <p id="panelVersion" style="margin-top: 15px; color: white; font-size: 1.1em; font-weight: bold;">
                 Version 1.1.1
             </p>
             <p style="color: rgba(255,255,255,0.7); font-size: 0.9em;">
@@ -299,6 +299,12 @@
     </div>
 
     <script>
+        // バージョン（ここだけ変更すればOK）
+        const APP_VERSION = '1.1.2';
+        localStorage.setItem('appVersion', APP_VERSION);
+        document.getElementById('headerVersion').textContent = 'Ver ' + APP_VERSION;
+        document.getElementById('panelVersion').textContent = 'Version ' + APP_VERSION;
+
         // 時刻更新
         function updateTime() {
             const now = new Date();
