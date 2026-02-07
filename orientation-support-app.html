@@ -583,19 +583,35 @@
             msg += '</div>';
             showGeneralModal(msg);
         }
+        function getCurrentLocationMapLink() {
+            if (!window.currentLocation) return { link: '', text: '', coords: '' };
+            var lat = window.currentLocation.lat, lon = window.currentLocation.lon;
+            var link = 'https://www.google.com/maps?q=' + lat + ',' + lon;
+            var coords = '緯度 ' + lat.toFixed(5) + ', 経度 ' + lon.toFixed(5);
+            return { link: link, text: '現在地（タップで地図を開く）: ' + link, coords: coords };
+        }
         function sendGoHomeEmail() {
             var email = localStorage.getItem('familyEmail');
             if (!email) return;
             var userName = localStorage.getItem('userName') || 'ご本人';
             var homeAddress = localStorage.getItem('homeAddress') || '';
+            var loc = getCurrentLocationMapLink();
             var subject = '【いつでもサポート】' + userName + 'さんが家に帰ります';
-            var body = userName + 'さんが今から家に帰ります。\n自宅: ' + homeAddress + '\n\n※このメールは「いつでもサポート」アプリから送信されています。';
+            var body = userName + 'さんが今から家に帰ります。\n\n自宅: ' + homeAddress;
+            if (loc.link) {
+                body += '\n\n【現在地】\n' + loc.coords + '\n地図で見る: ' + loc.link;
+            }
+            body += '\n\n※このメールは「いつでもサポート」アプリから送信されています。';
             window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
         }
         function sendGoHomeLINE() {
             var userName = localStorage.getItem('userName') || 'ご本人';
             var homeAddress = localStorage.getItem('homeAddress') || '';
+            var loc = getCurrentLocationMapLink();
             var text = userName + 'さんが今から家に帰ります。自宅: ' + homeAddress + ' 🏠';
+            if (loc.link) {
+                text += '\n【現在地】' + loc.coords + '\n' + loc.link;
+            }
             window.open('https://line.me/R/share?text=' + encodeURIComponent(text), '_blank');
         }
 
