@@ -317,6 +317,13 @@
         // 位置情報取得
         function updateLocation() {
             if (navigator.geolocation) {
+                // iPhone/Safari対応: より積極的なオプションを設定
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                };
+                
                 navigator.geolocation.getCurrentPosition(
                     async (position) => {
                         const lat = position.coords.latitude;
@@ -345,14 +352,19 @@
                             document.getElementById('locationText').innerHTML = `
                                 <strong>現在地</strong><br>
                                 ${address || '住所を取得中...'}<br>
-                                <small style="color: #999;">緯度: ${lat.toFixed(4)}, 経度: ${lon.toFixed(4)}</small>
+                                <small style="color: #999;">緯度: ${lat.toFixed(4)}, 経度: ${lon.toFixed(4)}</small><br>
+                                <button onclick="openMapsApp()" style="margin-top: 10px; padding: 8px 15px; background: #4285F4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
+                                    🗺️ 地図で確認
+                                </button>
                             `;
                         } catch (error) {
                             document.getElementById('locationText').innerHTML = `
                                 <strong>現在地</strong><br>
                                 緯度: ${lat.toFixed(4)}<br>
                                 経度: ${lon.toFixed(4)}<br>
-                                <small style="color: #999;">※正確な住所はマップで確認できます</small>
+                                <button onclick="openMapsApp()" style="margin-top: 10px; padding: 8px 15px; background: #4285F4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
+                                    🗺️ 地図で確認
+                                </button>
                             `;
                         }
                     },
@@ -367,9 +379,9 @@
                                     <div style="text-align: left; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px;">
                                         <strong style="color: #856404;">📍 許可する方法：</strong><br>
                                         <ol style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                                            <li>アドレスバーの🔒マークをクリック</li>
+                                            <li>アドレスバーの🔒マークをタップ</li>
                                             <li>「位置情報」を「許可」に変更</li>
-                                            <li>ページを更新（F5キー）</li>
+                                            <li>画面を下に引っ張って更新</li>
                                         </ol>
                                     </div>
                                 `;
@@ -387,14 +399,15 @@
                         document.getElementById('locationText').innerHTML = `
                             <strong style="color: #f5576c;">${errorMessage}</strong><br>
                             ${helpText}
-                            <button onclick="manualLocation()" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">
-                                📝 現在地を手動で入力
+                            <button onclick="openMapsApp()" style="margin-top: 15px; padding: 12px 20px; background: #4285F4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; width: 100%;">
+                                🗺️ 地図アプリで現在地を確認
                             </button>
-                            <button onclick="updateLocation()" style="margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">
+                            <button onclick="updateLocation()" style="margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; width: 100%;">
                                 🔄 再取得
                             </button>
                         `;
-                    }
+                    },
+                    options  // オプションを追加
                 );
             }
         }
@@ -971,28 +984,29 @@
             showGeneralModal(message);
         }
 
-        // 手動で現在地を入力
-        function manualLocation() {
-            const location = prompt('現在いる場所を入力してください\n\n例: 自宅、〇〇病院、スーパー、公園');
+        // 地図アプリを開く
+        function openMapsApp() {
+            // デバイス判定
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
             
-            if (location) {
-                localStorage.setItem('manualLocation', location);
-                const now = new Date();
-                const timeStr = now.toLocaleString('ja-JP', { 
-                    month: 'long', 
-                    day: 'numeric',
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                
-                document.getElementById('locationText').innerHTML = `
-                    <strong>現在地（手動入力）</strong><br>
-                    📍 ${location}<br>
-                    <small style="color: #999;">${timeStr}</small><br>
-                    <button onclick="updateLocation()" style="margin-top: 10px; padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
-                        🔄 自動取得を再試行
-                    </button>
-                `;
+            if (window.currentLocation) {
+                // 位置情報がある場合
+                const { lat, lon } = window.currentLocation;
+                if (isIOS) {
+                    // iPhoneの場合: Apple Maps
+                    window.open(`maps://?q=${lat},${lon}`, '_blank');
+                } else {
+                    // Android/PCの場合: Google Maps
+                    window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
+                }
+            } else {
+                // 位置情報がない場合: 現在地を開く
+                if (isIOS) {
+                    window.open('maps://', '_blank');
+                } else {
+                    window.open('https://www.google.com/maps', '_blank');
+                }
             }
         }
 
