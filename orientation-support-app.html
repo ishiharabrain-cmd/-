@@ -214,6 +214,7 @@
             <div class="time-display">
                 <div class="current-time" id="currentTime">--:--</div>
                 <div class="current-date" id="currentDate">----年--月--日</div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #999;">Ver 1.1.0</div>
             </div>
             
             <div class="location-display">
@@ -267,8 +268,11 @@
             <button onclick="showQRCode()" style="background: white; border: 2px solid #667eea; color: #667eea; padding: 15px 30px; border-radius: 10px; font-size: 1.2em; cursor: pointer; width: 100%;">
                 📱 QRコードを表示
             </button>
-            <p style="margin-top: 15px; color: white; font-size: 0.9em;">
-                バージョン 1.0.1 (2026-02-07)
+            <p style="margin-top: 15px; color: white; font-size: 1.1em; font-weight: bold;">
+                Version 1.1.0
+            </p>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9em;">
+                2026-02-07
             </p>
         </div>
     </div>
@@ -738,20 +742,131 @@
             const message = `
                 <h2 style="text-align: center;">🔍 物を探す</h2>
                 <p style="font-size: 1.3em; text-align: center; margin: 20px 0;">
-                    探したい物を選んでください
+                    よく探す物を選んでください
                 </p>
                 <div style="display: grid; gap: 10px;">
-                    <button onclick="findItem('鍵')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">🔑 鍵</button>
-                    <button onclick="findItem('財布')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">👛 財布</button>
-                    <button onclick="findItem('スマホ')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">📱 スマホ</button>
-                    <button onclick="findItem('メガネ')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer;">👓 メガネ</button>
+                    <button onclick="findItem('鍵', '🔑')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🔑 鍵</span>
+                        <span id="key-last" style="font-size: 0.8em; color: #999;"></span>
+                    </button>
+                    <button onclick="findItem('財布', '👛')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>👛 財布</span>
+                        <span id="wallet-last" style="font-size: 0.8em; color: #999;"></span>
+                    </button>
+                    <button onclick="findItem('スマホ', '📱')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>📱 スマホ</span>
+                        <span id="phone-last" style="font-size: 0.8em; color: #999;"></span>
+                    </button>
+                    <button onclick="findItem('メガネ', '👓')" style="padding: 20px; font-size: 1.3em; border-radius: 10px; border: none; background: #ffecd2; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>👓 メガネ</span>
+                        <span id="glasses-last" style="font-size: 0.8em; color: #999;"></span>
+                    </button>
                 </div>
+                <p style="text-align: center; margin-top: 20px; color: #999; font-size: 0.9em;">
+                    💡 見つけたら「見つけた」をタップして<br>場所を記録できます
+                </p>
             `;
             showGeneralModal(message);
+            
+            // 最後に見つけた場所を表示
+            updateLastFound();
+        }
+        
+        function updateLastFound() {
+            const items = {
+                'key': '鍵',
+                'wallet': '財布',
+                'phone': 'スマホ',
+                'glasses': 'メガネ'
+            };
+            
+            Object.keys(items).forEach(key => {
+                const location = localStorage.getItem(`item_${key}_location`);
+                const time = localStorage.getItem(`item_${key}_time`);
+                const element = document.getElementById(`${key}-last`);
+                
+                if (element && location) {
+                    element.textContent = `${location}`;
+                }
+            });
         }
 
-        function findItem(item) {
-            alert(`${item}を探します\n（実装時にはAirTagなどの位置情報サービスと連携）`);
+        function findItem(item, emoji) {
+            const itemKey = {
+                '鍵': 'key',
+                '財布': 'wallet',
+                'スマホ': 'phone',
+                'メガネ': 'glasses'
+            }[item];
+            
+            const lastLocation = localStorage.getItem(`item_${itemKey}_location`);
+            const lastTime = localStorage.getItem(`item_${itemKey}_time`);
+            
+            let message = `<h2 style="text-align: center;">${emoji} ${item}を探す</h2>`;
+            
+            if (lastLocation) {
+                message += `
+                    <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <p style="font-size: 1.3em; text-align: center; color: #155724;">
+                            <strong>前回見つけた場所</strong>
+                        </p>
+                        <p style="font-size: 1.5em; text-align: center; color: #155724; margin-top: 10px;">
+                            📍 ${lastLocation}
+                        </p>
+                        <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: 10px;">
+                            ${lastTime}
+                        </p>
+                    </div>
+                `;
+            } else {
+                message += `
+                    <p style="text-align: center; color: #666; margin: 20px 0;">
+                        まだ記録がありません
+                    </p>
+                `;
+            }
+            
+            message += `
+                <div style="margin-top: 20px;">
+                    <p style="text-align: center; color: #666; margin-bottom: 15px;">
+                        よくある場所をチェック：
+                    </p>
+                    <div style="display: grid; gap: 10px;">
+                        <button onclick="alert('玄関を確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">🚪 玄関</button>
+                        <button onclick="alert('リビングのテーブルを確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">🛋️ リビング</button>
+                        <button onclick="alert('寝室を確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">🛏️ 寝室</button>
+                        <button onclick="alert('洗面所・お風呂を確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">🚿 洗面所</button>
+                        <button onclick="alert('キッチンを確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">🍳 キッチン</button>
+                        <button onclick="alert('カバンやポケットを確認してください')" style="padding: 15px; font-size: 1.2em; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">👜 カバン・ポケット</button>
+                    </div>
+                </div>
+                
+                <button onclick="recordItemFound('${item}', '${itemKey}', '${emoji}')" style="width: 100%; padding: 20px; font-size: 1.5em; background: #28a745; color: white; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer;">
+                    ✅ 見つけた！場所を記録
+                </button>
+            `;
+            
+            showGeneralModal(message);
+        }
+        
+        function recordItemFound(item, itemKey, emoji) {
+            const location = prompt(`${emoji} ${item}をどこで見つけましたか？\n\n例: 玄関、リビングのテーブル、寝室`);
+            
+            if (location) {
+                const now = new Date();
+                const timeStr = now.toLocaleString('ja-JP', { 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                localStorage.setItem(`item_${itemKey}_location`, location);
+                localStorage.setItem(`item_${itemKey}_time`, timeStr);
+                
+                alert(`✅ 記録しました！\n\n${emoji} ${item}\n📍 ${location}\n🕐 ${timeStr}`);
+                closeGeneralModal();
+            }
         }
 
         // 家族に電話

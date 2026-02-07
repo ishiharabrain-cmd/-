@@ -242,15 +242,13 @@
                 return;
             }
 
-            // 成功メッセージ表示
+            // 通常の保存の場合もアプリに戻る
             const message = document.getElementById('successMessage');
             message.style.display = 'block';
+            
             setTimeout(() => {
-                message.style.display = 'none';
-            }, 3000);
-
-            // ページトップへスクロール
-            window.scrollTo(0, 0);
+                window.location.href = 'orientation-support-app.html';
+            }, 1500);
         });
 
         function goBack() {
