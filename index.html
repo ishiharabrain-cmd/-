@@ -1482,8 +1482,11 @@ function openOverlay(type) {
         <div style="margin-bottom: 20px; padding: 16px; background: var(--bg-soft); border-radius: 10px;">
           <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">Google連携（オプション）</div>
           <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px;">複数デバイスで同期したい場合のみ設定</div>
-          <button onclick="alert('Google連携は将来実装予定です')" style="width: 100%; padding: 12px; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
-            🔗 Googleカレンダーと連携
+          <button onclick="connectGoogleCalendar()" style="width: 100%; padding: 12px; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px;">
+            📅 Googleカレンダーと連携
+          </button>
+          <button onclick="connectGoogleTasks()" style="width: 100%; padding: 12px; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+            ✅ Google Tasksと連携
           </button>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-quiet); text-align: center;">
