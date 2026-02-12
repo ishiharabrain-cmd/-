@@ -1,477 +1,2379 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
-    <title>いつでもサポート - インストール</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>伴走者 v2.0 - 石原先生仕様</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=M+PLUS+Rounded+1c:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== 石原先生からの要望を反映 ===== */
+/* 1. 年号表示（2026年など）- ヘッダーに追加 */
+/* 2. 文字サイズ5段階（極小〜極大） */
+/* 3. 状況別モード（在宅/外出）で表示が変わる */
+/* 4. シングルタスク重視 */
+/* 5. Google完全連携（同期前提） */
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
+:root {
+  /* アクセシビリティ改善：コントラスト強化 */
+  --bg: #FEFCF6;
+  --bg-card: #FFFFFF;
+  --bg-soft: #F5F2E8;
+  --bg-accent: #FFF5E0;
+  --text: #2A2419; /* より濃く */
+  --text-sub: #5A5248; /* より濃く */
+  --text-quiet: #8A8270; /* より濃く */
+  --green: #4A7549; /* より濃く */
+  --green-soft: #E5F0E5;
+  --amber: #A36830; /* より濃く */
+  --amber-soft: #FFF0D8;
+  --blue: #3D5F8A; /* より濃く */
+  --blue-soft: #E5EDF8;
+  --rose: #A04545; /* より濃く */
+  --rose-soft: #FBE5E5;
+  --border: #D8D0C0; /* より濃く */
+  --shadow-sm: 0 1px 4px rgba(42,36,25,0.08);
+  --shadow-md: 0 4px 20px rgba(42,36,25,0.12);
+  --r: 18px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+.theme-night {
+  --bg: #1C1B1F;
+  --bg-card: #262529;
+  --bg-soft: #2C2B30;
+  --text: #E5E0D8;
+  --text-sub: #9A9288;
+  --border: #3A3832;
+}
 
-        .welcome-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .app-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
+html { font-size: 16px; }
 
-        h1 {
-            font-size: 2em;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
+/* 文字サイズ5段階（デフォルトはFire TVレベル）全体的に4pt大きく */
+.text-xs { font-size: 109%; }
+.text-sm { font-size: 129%; }
+.text-md { font-size: 154%; }
+.text-lg { font-size: 184%; }
+.text-xl { font-size: 224%; }
 
-        .subtitle {
-            font-size: 1.2em;
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
+body {
+  font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.8s var(--ease), color 0.5s var(--ease);
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
 
-        .step-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  padding: 20px 24px;
+  gap: 16px;
+}
 
-        .step-number {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 40px;
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-right: 15px;
-        }
+/* ===== ヘッダー ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 
-        .step-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-        }
+.header-left { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 
-        .step-content {
-            color: #666;
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-left: 55px;
-        }
+.clock {
+  font-size: clamp(2.8rem, 7vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
 
-        .device-specific {
-            background: #f8f9ff;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
+.clock-colon {
+  opacity: 1;
+  animation: pulse-colon 2s ease-in-out infinite;
+}
 
-        .device-name {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
+@keyframes pulse-colon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
 
-        .screenshot {
-            width: 100%;
-            max-width: 300px;
-            margin: 15px auto;
-            display: block;
-            border-radius: 10px;
-            border: 2px solid #ddd;
-        }
+.date-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-        .button {
-            display: block;
-            width: 100%;
-            padding: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
+.greeting-text {
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+  color: var(--green);
+  font-weight: 500;
+}
 
-        .button:active {
-            transform: scale(0.98);
-        }
+.date-text {
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  font-weight: 700;
+  color: var(--text);
+}
 
-        .primary-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+/* 年号表示（令和も追加） */
+.year-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: 700;
+  background: var(--bg-accent);
+  color: var(--amber);
+  margin-left: 8px;
+  line-height: 1.2;
+}
 
-        .secondary-button {
-            background: white;
-            color: #667eea;
-            border: 3px solid #667eea;
-        }
+.weekday-badge {
+  display: inline-block;
+  padding: 1px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 700;
+  margin-left: 6px;
+}
 
-        .install-button {
-            display: none;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
+.wd-sun { background: #FDDEDE; color: #B84C4C; }
+.wd-sat { background: #DDEAFB; color: #4C6EB8; }
+.wd-week { background: var(--green-soft); color: var(--green); }
 
-        .feature-list {
-            margin-top: 20px;
-        }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
-        .feature-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: #f8f9ff;
-            border-radius: 10px;
-        }
+/* モード切替ボタン（在宅/外出） */
+.mode-switch {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
 
-        .feature-icon {
-            font-size: 2em;
-            margin-right: 15px;
-        }
+.mode-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
 
-        .feature-text {
-            flex: 1;
-            font-size: 1.1em;
-            color: #333;
-        }
+.mode-btn.active {
+  background: var(--green);
+  color: white;
+}
 
-        .platform-detector {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+/* 天気＋服装アドバイス */
+.weather {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-sm);
+  min-width: 160px;
+}
 
-        .platform-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
+.weather-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-        .hidden {
-            display: none;
-        }
+.weather-emoji { font-size: 1.8rem; }
 
-        .success-message {
-            background: #d4edda;
-            border: 2px solid #28a745;
-            color: #155724;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-    </style>
+.weather-detail { flex: 1; }
+
+.weather-temp {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.weather-label {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.weather-advice {
+  font-size: 0.8rem;
+  color: var(--amber);
+  font-weight: 600;
+  background: var(--amber-soft);
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.settings-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease);
+  color: var(--text-sub);
+  opacity: 0.6;
+}
+
+.dot-btn:hover, .dot-btn.active { opacity: 1; border-color: var(--green); }
+
+/* ===== メインエリア ===== */
+.main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 16px;
+  min-height: 0;
+  transition: all 0.3s var(--ease);
+}
+
+/* 外出モードでは2段構成（上:家に帰る 下:3カラム） */
+.main.mode-out {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .main { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+}
+
+/* ===== カード ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: card-in 0.6s var(--ease) both;
+  transition: all 0.5s var(--ease);
+}
+
+.card.hidden { display: none; }
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-head {
+  padding: 18px 22px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-quiet);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-badge {
+  font-size: 0.72rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-amber { background: var(--amber-soft); color: var(--amber); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+
+.card-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ===== 外出モード専用カード ===== */
+.go-home-card {
+  display: none;
+  background: linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%);
+  border: none;
+  padding: 24px 30px;
+  text-align: center;
+  color: white;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.go-home-card.show { display: flex; }
+
+.go-home-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.go-home-icon {
+  font-size: 3rem;
+}
+
+.go-home-text {
+  text-align: left;
+}
+
+.go-home-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.go-home-desc {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.go-home-btn {
+  padding: 16px 32px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  background: white;
+  color: var(--green);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+}
+
+.go-home-btn:active { transform: scale(0.96); }
+
+/* 外出モードの下部グリッド */
+.out-bottom-grid {
+  display: none;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.out-bottom-grid.show { display: grid; }
+
+@media (max-width: 1024px) {
+  .out-bottom-grid { grid-template-columns: 1fr; }
+  .go-home-card { flex-direction: column; text-align: center; }
+  .go-home-left { flex-direction: column; }
+  .go-home-text { text-align: center; }
+}
+
+/* ===== ボトムバー ===== */
+.bottom {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+
+.action-btn:active { transform: scale(0.96); }
+.action-btn:hover { border-color: var(--green); box-shadow: var(--shadow-md); }
+
+.action-btn-icon { font-size: 1.3rem; }
+
+.action-primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.action-primary:hover { background: #4E7C4D; }
+
+/* ===== オーバーレイ ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease);
+}
+
+.overlay.open { opacity: 1; pointer-events: all; }
+
+.overlay-card {
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 36px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  transform: translateY(16px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.overlay.open .overlay-card { transform: translateY(0); }
+
+.ol-icon { font-size: 3rem; margin-bottom: 14px; }
+.ol-title { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.ol-body { font-size: 0.95rem; color: var(--text-sub); line-height: 1.7; margin-bottom: 24px; }
+
+.ol-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.ol-btn {
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+
+.ol-btn:active { transform: scale(0.96); }
+.ol-btn-green { background: var(--green); color: white; }
+.ol-btn-soft { background: var(--bg-soft); color: var(--text-sub); }
+
+/* GPS通知バナー */
+.gps-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: var(--amber);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  font-weight: 600;
+  font-size: 1rem;
+  z-index: 99;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gps-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ===== 音声ボタン（中央フローティング） ===== */
+.voice-fab {
+  position: fixed;
+  bottom: 140px;
+  right: 30px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%);
+  color: white;
+  border: 4px solid var(--bg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  z-index: 50;
+}
+
+.voice-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 40px rgba(91,140,90,0.3);
+}
+
+.voice-fab:active {
+  transform: scale(0.95);
+}
+
+.voice-fab.listening {
+  animation: pulse-voice 1.5s ease-in-out infinite;
+  background: linear-gradient(135deg, var(--rose) 0%, #A04545 100%);
+}
+
+@keyframes pulse-voice {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+  50% { transform: scale(1.15); box-shadow: 0 12px 50px rgba(184,92,92,0.4); }
+}
+
+/* 音声認識中のバナー */
+.voice-banner {
+  position: fixed;
+  bottom: 240px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card);
+  border: 2px solid var(--green);
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  z-index: 49;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s var(--ease);
+  min-width: 200px;
+  text-align: center;
+}
+
+.voice-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.voice-banner-text {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+/* 数字キーパッド（オプション） */
+.numpad {
+  position: fixed;
+  bottom: 140px;
+  left: 30px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: all 0.3s var(--ease);
+}
+
+.numpad.show {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.numpad-key {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-soft);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease);
+}
+
+.numpad-key:hover {
+  background: var(--green-soft);
+  border-color: var(--green);
+}
+
+.numpad-key:active {
+  transform: scale(0.9);
+}
+
+@media (max-width: 768px) {
+  .voice-fab {
+    bottom: 100px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+  }
+  .voice-banner { bottom: 190px; }
+  .numpad { left: 20px; bottom: 100px; }
+}
+
+/* ===== 数字ガイドバッジ ===== */
+.number-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--rose);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.number-badge.show {
+  opacity: 1;
+}
+
+.number-badge.blink {
+  animation: blink-badge 2s ease-in-out infinite;
+}
+
+@keyframes blink-badge {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+/* 点滅は30秒後に停止 */
+.number-badge.blink-stop {
+  animation: none;
+}
+</style>
 </head>
-<body>
-    <div class="container">
-        <!-- ウェルカムカード -->
-        <div class="welcome-card">
-            <div class="app-icon">🏠</div>
-            <h1>いつでもサポート</h1>
-            <p class="subtitle">
-                認知症の方の日常生活をサポートする<br>
-                見当識支援アプリケーション
-            </p>
+<body class="text-md">
 
-            <!-- プラットフォーム検出 -->
-            <div class="platform-detector" id="platformInfo">
-                <div class="platform-icon" id="platformIcon">📱</div>
-                <div id="platformText">お使いのデバイスを確認中...</div>
-            </div>
+<div class="app">
 
-            <!-- インストールボタン（PWA対応ブラウザのみ表示） -->
-            <button class="button install-button" id="installButton">
-                📥 アプリをインストール
-            </button>
-
-            <!-- 主要ボタン -->
-            <button class="button primary-button" onclick="startSetup()">
-                🚀 今すぐ始める
-            </button>
-            
-            <button class="button secondary-button" onclick="showInstructions()">
-                📖 インストール方法を見る
-            </button>
+  <!-- ===== ヘッダー ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="clock" id="clock">--<span class="clock-colon">:</span>--</div>
+      <div class="date-area">
+        <div class="greeting-text" id="greeting">おはようございます</div>
+        <div class="date-text" id="dateText">
+          <span id="dateDisplay">--</span>
+          <span class="year-badge" id="yearBadge">2026年</span>
         </div>
-
-        <!-- 機能紹介 -->
-        <div class="step-card">
-            <div class="step-title">✨ 主な機能</div>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <div class="feature-icon">🕐</div>
-                    <div class="feature-text">今の時間と日付を大きく表示</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📍</div>
-                    <div class="feature-text">現在地を確認して家に帰るナビ</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📹</div>
-                    <div class="feature-text">退屈を和らげる動画視聴</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📸</div>
-                    <div class="feature-text">写真を撮って家族に送信</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">💊</div>
-                    <div class="feature-text">お薬の時間をお知らせ</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🔍</div>
-                    <div class="feature-text">物を探すサポート</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📞</div>
-                    <div class="feature-text">家族にワンタッチで電話</div>
-                </div>
-            </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- モード切替 -->
+      <div class="mode-switch">
+        <button class="mode-btn active" onclick="switchMode('home')" id="btnHome">🏠 在宅</button>
+        <button class="mode-btn" onclick="switchMode('out')" id="btnOut">🚶 外出</button>
+      </div>
+      <!-- 天気＋服装 -->
+      <div class="weather">
+        <div class="weather-top">
+          <span class="weather-emoji">☀️</span>
+          <div class="weather-detail">
+            <div class="weather-temp">8°</div>
+            <div class="weather-label">仙台 はれ</div>
+          </div>
         </div>
+        <div class="weather-advice" id="clothAdvice">コートを着てね</div>
+      </div>
+      <!-- 設定 -->
+      <div class="settings-dots">
+        <button class="dot-btn" onclick="cycleTextSize()" title="文字サイズ" id="btnText">あ</button>
+        <button class="dot-btn" onclick="toggleKana()" title="ひらがな" id="btnKana">ひ</button>
+        <button class="dot-btn" onclick="toggleNight()" title="夜モード" id="btnNight">🌙</button>
+      </div>
+    </div>
+  </header>
 
-        <!-- インストール手順（非表示、ボタンクリックで表示） -->
-        <div id="instructionsSection" class="hidden">
-            <!-- iPhone/iPad向け -->
-            <div class="step-card" id="iosInstructions">
-                <div class="step-title">
-                    <span class="step-number">1</span>
-                    iPhone/iPadでインストール
-                </div>
-                <div class="step-content">
-                    <div class="device-specific">
-                        <div class="device-name">📱 Safariで開いている場合</div>
-                        <ol style="margin-left: 20px; margin-top: 10px;">
-                            <li>画面下部の共有ボタン <strong>□↑</strong> をタップ</li>
-                            <li>「ホーム画面に追加」をタップ</li>
-                            <li>「追加」をタップして完了</li>
-                        </ol>
-                    </div>
-                    <p style="margin-top: 15px; color: #999;">
-                        ※ Chrome等の他のブラウザをお使いの場合は、Safariで開き直してください
-                    </p>
-                </div>
-            </div>
-
-            <!-- Android向け -->
-            <div class="step-card" id="androidInstructions">
-                <div class="step-title">
-                    <span class="step-number">1</span>
-                    Androidでインストール
-                </div>
-                <div class="step-content">
-                    <div class="device-specific">
-                        <div class="device-name">🤖 Chromeで開いている場合</div>
-                        <ol style="margin-left: 20px; margin-top: 10px;">
-                            <li>画面上部に表示される「インストール」をタップ</li>
-                            <li>または、右上のメニュー ⋮ から「ホーム画面に追加」を選択</li>
-                            <li>「インストール」をタップして完了</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PC向け -->
-            <div class="step-card" id="pcInstructions">
-                <div class="step-title">
-                    <span class="step-number">1</span>
-                    パソコンでインストール
-                </div>
-                <div class="step-content">
-                    <div class="device-specific">
-                        <div class="device-name">💻 Chrome/Edgeの場合</div>
-                        <ol style="margin-left: 20px; margin-top: 10px;">
-                            <li>アドレスバー右側の「インストール」アイコンをクリック</li>
-                            <li>または、右上のメニューから「アプリをインストール」を選択</li>
-                            <li>「インストール」をクリックして完了</li>
-                        </ol>
-                    </div>
-                    <p style="margin-top: 15px; color: #999;">
-                        ※ アプリとして独立したウィンドウで使用できます
-                    </p>
-                </div>
-            </div>
-
-            <!-- 初期設定 -->
-            <div class="step-card">
-                <div class="step-title">
-                    <span class="step-number">2</span>
-                    初期設定を行う
-                </div>
-                <div class="step-content">
-                    <p>アプリを開いたら、以下の情報を設定してください：</p>
-                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 2;">
-                        <li>✅ お名前と自宅住所</li>
-                        <li>✅ 家族の連絡先（電話番号・メール）</li>
-                        <li>✅ かかりつけのクリニック情報</li>
-                        <li>✅ お薬を飲む時間</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- 使い始める -->
-            <div class="step-card">
-                <div class="step-title">
-                    <span class="step-number">3</span>
-                    さあ、使い始めましょう！
-                </div>
-                <div class="step-content">
-                    <p>ホーム画面のアイコンをタップすれば、いつでもアプリを起動できます。</p>
-                    <button class="button primary-button" onclick="startSetup()" style="margin-top: 20px;">
-                        🚀 設定を始める
-                    </button>
-                </div>
-            </div>
+  <!-- ===== メイン ===== -->
+  <main class="main" id="mainArea">
+    
+    <!-- 在宅モードのカード（通常3カラム） -->
+    <div class="card" id="card1">
+      <div class="card-head">
+        <div class="card-label"><span>📅</span> <span data-i18n="cal">きょうの よてい</span></div>
+        <span class="card-badge badge-green">Google</span>
+      </div>
+      <div class="card-body">
+        <div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">
+          Googleカレンダーと同期します
         </div>
+      </div>
     </div>
 
-    <script>
-        let deferredPrompt;
+    <div class="card" id="card2">
+      <div class="card-head">
+        <div class="card-label"><span>✅</span> <span data-i18n="todo">やること</span></div>
+        <button onclick="openOverlay('add-todo')" style="background: var(--green); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--ease);" title="Todoを追加">➕</button>
+      </div>
+      <div class="card-body">
+        <div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">
+          Google Todoと同期します
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card3">
+      <div class="card-head">
+        <div class="card-label"><span>📝</span> <span data-i18n="log">きょうの きろく</span></div>
+        <button onclick="openOverlay('log-history')" style="background: var(--amber); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--ease);" title="記録の履歴を見る">📋</button>
+      </div>
+      <div class="card-body">
+        <div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">
+          今日の記録が表示されます
+        </div>
+      </div>
+    </div>
+
+    <!-- 外出モード専用カード（上部：家に帰る） -->
+    <div class="card go-home-card" id="cardGoHome">
+      <div class="go-home-left">
+        <div class="go-home-icon">🏠</div>
+        <div class="go-home-text">
+          <div class="go-home-title" data-i18n="gohome">いえに かえる</div>
+          <div class="go-home-desc">おうちまでの みち</div>
+        </div>
+      </div>
+      <button class="go-home-btn" onclick="openMap()">🗺️ みちあんない</button>
+    </div>
+
+    <!-- 外出モード下部グリッド（買い物・予定） -->
+    <div class="out-bottom-grid" id="outBottomGrid">
+      <!-- 買い物リスト -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-label"><span>🛒</span> <span data-i18n="shopping">かいものリスト</span></div>
+          <span class="card-badge badge-amber">Google Keep</span>
+        </div>
+        <div class="card-body" id="shoppingBody">
+          <div style="padding: 16px 22px;">
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 12px;">今日買うもの</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-soft); border-radius: 10px; cursor: pointer;">
+                <input type="checkbox" style="width: 20px; height: 20px;">
+                <span style="font-size: 0.95rem;">🥛 牛乳</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-soft); border-radius: 10px; cursor: pointer;">
+                <input type="checkbox" style="width: 20px; height: 20px;">
+                <span style="font-size: 0.95rem;">🍞 パン</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-soft); border-radius: 10px; cursor: pointer;">
+                <input type="checkbox" style="width: 20px; height: 20px;">
+                <span style="font-size: 0.95rem;">🥚 たまご</span>
+              </label>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+              <div style="font-size: 0.75rem; color: var(--text-quiet); margin-bottom: 8px;">前回買ったもの（2/11）</div>
+              <div style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.6;">牛乳、パン、バナナ、たまご</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 今日の予定 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-label"><span>📅</span> <span data-i18n="today">きょうの よてい</span></div>
+          <span class="card-badge badge-green">今日</span>
+        </div>
+        <div class="card-body">
+          <div style="padding: 16px 22px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">14:00</div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">デイサービス</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">お迎えが来ます</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">18:30</div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">夜の服薬</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 明日の予定 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-label"><span>📆</span> <span data-i18n="tomorrow">あしたの よてい</span></div>
+          <span class="card-badge badge-blue">明日</span>
+        </div>
+        <div class="card-body">
+          <div style="padding: 16px 22px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">8:00</div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">ゴミ出し</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">燃えるゴミ</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">10:00</div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">石原クリニック</div>
+                <div style="font-size: 0.8rem; color: var(--text-sub);">薬をもらう</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== ボトム ===== -->
+  <footer class="bottom" id="bottomBar">
+    <button class="action-btn action-primary" onclick="openOverlay('log')" style="position: relative;">
+      <span class="number-badge show blink" id="badge-2">2</span>
+      <span class="action-btn-icon">📝</span>
+      <span data-i18n="btn-log">記録する</span>
+    </button>
+    <!-- あいさつボタン（迷子札） -->
+    <button class="action-btn" onclick="openOverlay('idcard')" style="background: var(--rose-soft); border-color: var(--rose); position: relative;">
+      <span class="number-badge show blink" id="badge-9">9</span>
+      <span class="action-btn-icon">🆔</span>
+      <span data-i18n="btn-idcard">あいさつ</span>
+    </button>
+    <!-- 音声ボタン（あいさつの右側、右利き用） -->
+    <button class="action-btn" onclick="toggleVoice()" style="background: linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%); border-color: var(--green); color: white; position: relative;">
+      <span class="number-badge show blink" id="badge-voice" style="background: white; color: var(--green);">🎤</span>
+      <span class="action-btn-icon">🎤</span>
+      <span data-i18n="btn-voice">音声</span>
+    </button>
+    <button class="action-btn" onclick="openOverlay('call')" style="position: relative;">
+      <span class="number-badge show blink" id="badge-4">4</span>
+      <span class="action-btn-icon">📞</span>
+      <span data-i18n="btn-call">電話</span>
+    </button>
+    <button class="action-btn" onclick="openOverlay('video')" style="position: relative;">
+      <span class="number-badge show blink" id="badge-3">3</span>
+      <span class="action-btn-icon">📺</span>
+      <span data-i18n="btn-video">動画</span>
+    </button>
+    <button class="action-btn" onclick="openOverlay('places')" style="position: relative;">
+      <span class="number-badge show blink" id="badge-8">8</span>
+      <span class="action-btn-icon">🗺️</span>
+      <span data-i18n="btn-places">場所</span>
+    </button>
+    <!-- おしゃべりボタン（一番右、有料マーク） -->
+    <button class="action-btn" onclick="openOverlay('chat')" style="background: var(--amber-soft); border-color: var(--amber); position: relative;">
+      <span class="number-badge show blink" id="badge-6">6</span>
+      <span class="action-btn-icon">💬</span>
+      <span data-i18n="btn-chat">おしゃべり</span>
+      <span style="position: absolute; top: -6px; right: -6px; background: var(--amber); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; font-weight: 700;">⭐有料</span>
+    </button>
+    <!-- 外出モードで追加 -->
+    <button class="action-btn" id="btnReceipt" style="display: none; position: relative;" onclick="openOverlay('receipt')">
+      <span class="action-btn-icon">📷</span>
+      <span data-i18n="btn-receipt">レシート</span>
+    </button>
+  </footer>
+
+</div>
+
+<!-- GPS通知バナー -->
+<div class="gps-banner" id="gpsBanner">
+  📍 スーパーに着きました<br>買い物リストを見ますか？
+</div>
+
+<!-- オーバーレイ -->
+<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="overlay-card" id="olCard"></div>
+</div>
+
+
+<!-- 音声認識バナー -->
+<div class="voice-banner" id="voiceBanner">
+  <div>🎤 聞いています...</div>
+  <div class="voice-banner-text" id="voiceText">何かお話しください</div>
+</div>
+
+<!-- 数字キーパッド -->
+<div class="numpad" id="numpad">
+  <button class="numpad-key" onclick="executeCommand(1)">1</button>
+  <button class="numpad-key" onclick="executeCommand(2)">2</button>
+  <button class="numpad-key" onclick="executeCommand(3)">3</button>
+  <button class="numpad-key" onclick="executeCommand(4)">4</button>
+  <button class="numpad-key" onclick="executeCommand(5)">5</button>
+  <button class="numpad-key" onclick="executeCommand(6)">6</button>
+  <button class="numpad-key" onclick="executeCommand(7)">7</button>
+  <button class="numpad-key" onclick="executeCommand(8)">8</button>
+  <button class="numpad-key" onclick="executeCommand(9)">9</button>
+</div>
+
+<script>
+// ===== STATE =====
+let currentMode = 'home'; // 'home' or 'out'
+let kanaMode = false; // デフォルトは漢字
+let textLevel = 2; // デフォルトはmd（Fire TVレベル：150%）
+let nightForced = false;
+let isListening = false;
+let recognition = null;
+let synthesis = window.speechSynthesis;
+let showNumberGuide = true; // 数字ガイド表示（設定で消せる）
+
+const textLevels = ['text-xs', 'text-sm', 'text-md', 'text-lg', 'text-xl'];
+
+// ===== ローカルデータストア =====
+let localEvents = []; // カレンダーの予定
+let localTodos = []; // Todo
+let localLogs = []; // 記録（ライフログ）
+let chatHistory = []; // チャット履歴
+
+// ローカルストレージキー
+const STORAGE_KEYS = {
+  EVENTS: 'banso_events',
+  TODOS: 'banso_todos',
+  LOGS: 'banso_logs',
+  CHATS: 'banso_chats',
+  SETTINGS: 'banso_settings',
+  API_KEY: 'banso_api_key'
+};
+
+// 音声コマンドマッピング
+const VOICE_COMMANDS = {
+  1: { keywords: ['いち', '1', 'ワン', '家', 'いえ', '帰る', 'かえる'], action: 'home', label: '🏠 家に帰る' },
+  2: { keywords: ['に', '2', 'ツー', '記録', 'きろく', 'やったこと'], action: 'log', label: '📝 記録する' },
+  3: { keywords: ['さん', '3', 'スリー', '動画', 'どうが', 'ビデオ'], action: 'video', label: '📺 動画' },
+  4: { keywords: ['よん', '4', 'フォー', '電話', 'でんわ', 'コール'], action: 'call', label: '📞 電話' },
+  5: { keywords: ['ご', '5', 'ファイブ', 'メール', 'めーる'], action: 'mail', label: '📧 メール' },
+  6: { keywords: ['ろく', '6', 'シックス', '壁打ち', 'かべうち', '相談', 'そうだん'], action: 'chat', label: '💬 壁打ち' },
+  7: { keywords: ['なな', 'しち', '7', 'セブン', '予定', 'よてい', 'スケジュール'], action: 'schedule', label: '📅 予定' },
+  8: { keywords: ['はち', '8', 'エイト', '場所', 'ばしょ', '地図'], action: 'places', label: '🗺️ 場所' },
+  9: { keywords: ['きゅう', 'く', '9', 'ナイン', 'あいさつ', '迷子'], action: 'idcard', label: '🆔 あいさつ' },
+};
+
+// ===== I18N =====
+const I18N = {
+  'cal': { h: 'きょうの よてい', k: '今日の予定' },
+  'todo': { h: 'やること', k: 'やること' },
+  'log': { h: 'きょうの きろく', k: '今日の記録' },
+  'gohome': { h: 'いえに かえる', k: '家に帰る' },
+  'shopping': { h: 'かいものリスト', k: '買い物リスト' },
+  'today': { h: 'きょうの よてい', k: '今日の予定' },
+  'tomorrow': { h: 'あしたの よてい', k: '明日の予定' },
+  'btn-log': { h: 'きろくする', k: '記録する' },
+  'btn-call': { h: 'でんわ', k: '電話' },
+  'btn-chat': { h: 'おしゃべり', k: 'おしゃべり' },
+  'btn-video': { h: 'どうが', k: '動画' },
+  'btn-places': { h: 'ばしょ', k: '場所' },
+  'btn-receipt': { h: 'レシート', k: 'レシート' },
+  'btn-idcard': { h: 'あいさつ', k: 'あいさつ' },
+  'btn-voice': { h: 'おんせい', k: '音声' },
+};
+
+function applyI18N() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[key]) el.textContent = kanaMode ? I18N[key].h : I18N[key].k;
+  });
+}
+
+// ===== クロック =====
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').innerHTML = h + '<span class="clock-colon">:</span>' + m;
+
+  const days = ['日','月','火','水','木','金','土'];
+  const y = now.getFullYear();
+  const mo = now.getMonth() + 1;
+  const d = now.getDate();
+  const w = days[now.getDay()];
+  const wClass = now.getDay() === 0 ? 'wd-sun' : now.getDay() === 6 ? 'wd-sat' : 'wd-week';
+
+  document.getElementById('dateDisplay').textContent = mo + '月' + d + '日';
+  const wb = '<span class="weekday-badge ' + wClass + '">' + w + (kanaMode ? 'ようび' : '曜日') + '</span>';
+  document.getElementById('dateDisplay').innerHTML = mo + '月' + d + '日' + wb;
+  
+  // 年号（令和も表示）
+  const reiwa = y - 2018; // 2019年が令和元年
+  document.getElementById('yearBadge').innerHTML = '<span style="font-size:0.85em;">令和' + reiwa + '年</span><span>' + y + '年</span>';
+
+  const hour = now.getHours();
+  let gr = 'おはようございます';
+  if (hour >= 11 && hour < 17) gr = 'こんにちは';
+  if (hour >= 17 && hour < 21) gr = 'こんばんは';
+  if (hour >= 21 || hour < 5) gr = kanaMode ? 'おやすみなさい' : 'おやすみなさい';
+  document.getElementById('greeting').textContent = gr;
+
+  // 自動テーマ
+  if (!nightForced) {
+    document.body.classList.remove('theme-night');
+    if (hour >= 21 || hour < 6) document.body.classList.add('theme-night');
+  }
+}
+
+// ===== モード切替 =====
+function switchMode(mode) {
+  currentMode = mode;
+  const main = document.getElementById('mainArea');
+  const btnHome = document.getElementById('btnHome');
+  const btnOut = document.getElementById('btnOut');
+  const card1 = document.getElementById('card1');
+  const card2 = document.getElementById('card2');
+  const card3 = document.getElementById('card3');
+  const cardGoHome = document.getElementById('cardGoHome');
+  const outBottomGrid = document.getElementById('outBottomGrid');
+  const bottomBar = document.getElementById('bottomBar');
+  const btnReceipt = document.getElementById('btnReceipt');
+
+  if (mode === 'out') {
+    // 外出モード: 上に「家に帰る」、下に買い物・予定
+    main.classList.add('mode-out');
+    btnHome.classList.remove('active');
+    btnOut.classList.add('active');
+    card1.classList.add('hidden');
+    card2.classList.add('hidden');
+    card3.classList.add('hidden');
+    cardGoHome.classList.add('show');
+    outBottomGrid.classList.add('show');
+    btnReceipt.style.display = 'flex';
+  } else {
+    // 在宅モード: 通常
+    main.classList.remove('mode-out');
+    btnHome.classList.add('active');
+    btnOut.classList.remove('active');
+    card1.classList.remove('hidden');
+    card2.classList.remove('hidden');
+    card3.classList.remove('hidden');
+    cardGoHome.classList.remove('show');
+    outBottomGrid.classList.remove('show');
+    btnReceipt.style.display = 'none';
+  }
+}
+
+// ===== 設定 =====
+function cycleTextSize() {
+  textLevel = (textLevel + 1) % 5;
+  document.body.classList.remove(...textLevels);
+  document.body.classList.add(textLevels[textLevel]);
+  document.getElementById('btnText').classList.toggle('active', textLevel !== 2);
+}
+
+function toggleKana() {
+  kanaMode = !kanaMode;
+  document.getElementById('btnKana').classList.toggle('active', !kanaMode);
+  applyI18N();
+}
+
+function toggleNight() {
+  nightForced = !nightForced;
+  document.getElementById('btnNight').classList.toggle('active', nightForced);
+  if (nightForced) {
+    document.body.classList.add('theme-night');
+  } else {
+    document.body.classList.remove('theme-night');
+    updateClock();
+  }
+}
+
+// ===== GPS通知デモ =====
+function demoGPS() {
+  setTimeout(() => {
+    const banner = document.getElementById('gpsBanner');
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
+  }, 8000);
+}
+
+// ===== オーバーレイ =====
+function openOverlay(type) {
+  const card = document.getElementById('olCard');
+  let html = '';
+
+  if (type === 'log') {
+    html = `
+      <div class="ol-icon">📝</div>
+      <div class="ol-title">${kanaMode ? 'きょうの きろく' : '今日の記録'}</div>
+      <div class="ol-body" style="text-align: left;">
+        <textarea id="logContent" placeholder="何をしましたか？&#10;例：散歩に行った、友達に会った、映画を見た" style="width: 100%; padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; min-height: 120px; resize: vertical; line-height: 1.6;"></textarea>
+        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="addQuickLog('散歩した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🚶 散歩した</button>
+          <button onclick="addQuickLog('食事した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🍽️ 食事した</button>
+          <button onclick="addQuickLog('友達に会った')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">👥 友達に会った</button>
+          <button onclick="addQuickLog('買い物した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🛒 買い物した</button>
+        </div>
+        <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
+          💡 音声でも記録できます：「記録して：今日は公園に行きました」
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="saveLog()">✅ ${kanaMode ? 'きろく' : '記録する'}</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'call') {
+    html = `
+      <div class="ol-icon">📞</div>
+      <div class="ol-title">${kanaMode ? 'だれに でんわする？' : '誰に電話する？'}</div>
+      <div class="ol-body"></div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="closeOverlayDirect()">👨 太郎さん</button>
+        <button class="ol-btn ol-btn-green" onclick="closeOverlayDirect()">👩 花子さん</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'やめる' : 'やめる'}</button>
+      </div>
+    `;
+  } else if (type === 'places') {
+    html = `
+      <div class="ol-icon">🗺️</div>
+      <div class="ol-title">${kanaMode ? 'どこに いく？' : 'どこに行く？'}</div>
+      <div class="ol-body">${kanaMode ? 'よく いく ばしょ' : 'よく行く場所'}</div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="openPlaceMap('スーパー')">🏪 スーパー</button>
+        <button class="ol-btn ol-btn-green" onclick="openPlaceMap('クリニック')">🏥 クリニック</button>
+        <button class="ol-btn ol-btn-green" onclick="openPlaceMap('公園')">🌳 公園</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'receipt') {
+    html = `
+      <div class="ol-icon">📷</div>
+      <div class="ol-title">${kanaMode ? 'レシートを とる' : 'レシートを撮る'}</div>
+      <div class="ol-body">${kanaMode ? 'かった ものを おぼえておきます' : '買ったものを覚えておきます'}</div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="takeReceipt()">📷 ${kanaMode ? 'しゃしんを とる' : '写真を撮る'}</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'idcard') {
+    // 迷子札：名前と住所を大きく表示
+    html = `
+      <div class="ol-icon">🆔</div>
+      <div class="ol-title">${kanaMode ? 'わたしの じょうほう' : '私の情報'}</div>
+      <div class="ol-body" style="text-align: left; background: var(--bg-soft); padding: 20px; border-radius: 12px; margin: 16px 0;">
+        <div style="font-size: 0.85rem; color: var(--text-quiet); margin-bottom: 8px;">${kanaMode ? 'なまえ' : '名前'}</div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 20px;">山田 太郎</div>
+        <div style="font-size: 0.85rem; color: var(--text-quiet); margin-bottom: 8px;">${kanaMode ? 'じゅうしょ' : '住所'}</div>
+        <div style="font-size: 1.15rem; font-weight: 600; color: var(--text); line-height: 1.6;">
+          〒980-0000<br>
+          宮城県仙台市青葉区〇〇1-2-3
+        </div>
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-sub);">
+          ${kanaMode ? 'こまったら このがめんを だれかに みせてください' : '困ったら この画面を誰かに見せてください'}
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="callFamily()">📞 ${kanaMode ? 'かぞくに でんわ' : '家族に電話'}</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'chat') {
+    // AIおしゃべり（3種類）
+    html = `
+      <div class="ol-icon">💬</div>
+      <div class="ol-title">${kanaMode ? 'おしゃべり' : 'おしゃべり'}</div>
+      <div class="ol-body">${kanaMode ? 'どちらと おはなししますか？' : 'どちらとお話ししますか？'}</div>
+      <div class="ol-actions" style="flex-direction: column; width: 100%;">
+        <button class="ol-btn ol-btn-green" onclick="openChat('wallbounce')" style="width: 100%; padding: 18px 24px; font-size: 1.05rem;">
+          🤔 ${kanaMode ? 'かべうち・そうだん' : '壁打ち・相談'}
+          <div style="font-size: 0.7rem; font-weight: 400; opacity: 0.8; margin-top: 4px;">考えを整理したいとき</div>
+        </button>
+        <button class="ol-btn ol-btn-green" onclick="openChat('gemini')" style="width: 100%; padding: 18px 24px; font-size: 1.05rem;">
+          💬 ${kanaMode ? 'ざつだん・こころの サポート' : '雑談・心のサポート'}
+          <div style="font-size: 0.7rem; font-weight: 400; opacity: 0.8; margin-top: 4px;">情報提供・情緒的安定</div>
+        </button>
+        <button class="ol-btn ol-btn-green" onclick="openChat('ishihara')" style="width: 100%; padding: 18px 24px; font-size: 1.05rem;">
+          🧠 ${kanaMode ? 'にんちしょうの そうだん' : '認知症の相談'}
+          <div style="font-size: 0.7rem; font-weight: 400; opacity: 0.8; margin-top: 4px;">石原先生の認知症知恵袋</div>
+        </button>
+        <div style="margin-top: 12px; padding: 12px; background: var(--amber-soft); border-radius: 10px; font-size: 0.75rem; color: var(--amber); text-align: center;">
+          ⭐ サブスク機能（API利用）
+        </div>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()" style="width: 100%; margin-top: 8px;">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'mail') {
+    // メール一覧
+    html = `
+      <div class="ol-icon">📧</div>
+      <div class="ol-title">${kanaMode ? 'メール' : 'メール'}</div>
+      <div class="ol-body" style="text-align: left;">
+        <div style="padding: 16px; background: var(--bg-soft); border-radius: 12px; margin-bottom: 12px; cursor: pointer;" onclick="openMailDetail(0)">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 4px;">太郎さん</div>
+          <div style="font-size: 0.95rem; color: var(--text);">週末遊びに行くね！</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">お母さん、土曜日の昼頃着くよ...</div>
+        </div>
+        <div style="padding: 16px; background: var(--bg-soft); border-radius: 12px; cursor: pointer;" onclick="openMailDetail(1)">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 4px;">石原クリニック</div>
+          <div style="font-size: 0.95rem; color: var(--text);">次回予約のお知らせ</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 4px;">2月18日 10時に予約が...</div>
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'mail-reply') {
+    // メール返信（AI下書き）
+    html = `
+      <div class="ol-icon">✍️</div>
+      <div class="ol-title">${kanaMode ? 'メールへんしん' : 'メール返信'}</div>
+      <div class="ol-body" style="text-align: left;">
+        <div style="padding: 16px; background: var(--bg-soft); border-radius: 12px; margin-bottom: 12px;">
+          <div style="font-size: 0.8rem; color: var(--text-quiet); margin-bottom: 8px;">AIが下書きを考えました</div>
+          <div style="font-size: 0.95rem; color: var(--text); line-height: 1.7;">
+            太郎へ<br><br>
+            ありがとう。土曜日楽しみにしてるよ。<br>
+            食べたいものは、お寿司がいいな。<br><br>
+            気をつけて来てね。
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding: 12px; background: var(--amber-soft); border-radius: 10px; font-size: 0.75rem; color: var(--amber); text-align: center;">
+          ⭐ AI機能（サブスク）
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="sendMail()">📧 ${kanaMode ? 'おくる' : '送る'}</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'やめる' : 'やめる'}</button>
+      </div>
+    `;
+  } else if (type === 'video') {
+    // 動画（暇つぶし）
+    html = `
+      <div class="ol-icon">📺</div>
+      <div class="ol-title">${kanaMode ? 'なにを みる？' : '何を見る？'}</div>
+      <div class="ol-body"></div>
+      <div class="ol-actions" style="flex-direction: column; width: 100%;">
+        <button class="ol-btn ol-btn-green" onclick="openYT('癒しの音楽')" style="width: 100%; justify-content: flex-start; padding: 14px 20px;">🎵 ${kanaMode ? 'おんがく' : '音楽'}</button>
+        <button class="ol-btn ol-btn-green" onclick="openYT('懐かしい歌')" style="width: 100%; justify-content: flex-start; padding: 14px 20px;">🎤 ${kanaMode ? 'なつかしい うた' : '懐かしい歌'}</button>
+        <button class="ol-btn ol-btn-green" onclick="openYT('猫の動画')" style="width: 100%; justify-content: flex-start; padding: 14px 20px;">🐱 ${kanaMode ? 'ねこ' : '猫'}</button>
+        <button class="ol-btn ol-btn-green" onclick="openYT('自然の映像')" style="width: 100%; justify-content: flex-start; padding: 14px 20px;">🌿 ${kanaMode ? 'しぜん' : '自然'}</button>
+        <button class="ol-btn ol-btn-green" onclick="openYT('体操')" style="width: 100%; justify-content: flex-start; padding: 14px 20px;">🤸 ${kanaMode ? 'たいそう' : '体操'}</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()" style="width: 100%; margin-top: 8px;">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'welcome') {
+    // 初回起動：ようこそ画面 + メールアドレス収集
+    html = `
+      <div class="ol-icon" style="font-size: 3rem;">👋</div>
+      <div class="ol-title" style="font-size: 1.5rem;">ようこそ！</div>
+      <div class="ol-body" style="text-align: left; line-height: 1.8;">
+        <p style="margin-bottom: 16px;">このアプリは、認知症の方や高齢の方が<br>安心して暮らせるための<strong>やさしい伴走者</strong>です。</p>
+        <p style="margin-bottom: 16px;">✅ 音声で操作できます<br>✅ 大きな文字で見やすい<br>✅ 家族とつながる</p>
+        <p style="margin-bottom: 8px; font-weight: 700;">更新情報を受け取りますか？</p>
+        <input type="email" id="userEmail" placeholder="メールアドレス（任意）" style="width: 100%; padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 8px;">
+        <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 16px;">※ 新機能のお知らせや、学会発表のご案内をお送りします。<br>入力しなくてもアプリは使えます。</div>
+      </div>
+      <div class="ol-actions" style="flex-direction: column; width: 100%;">
+        <button class="ol-btn ol-btn-green" onclick="saveEmailAndStart()" style="width: 100%; padding: 16px 20px; font-size: 1.1rem;">
+          ✅ 始める
+        </button>
+        <button class="ol-btn ol-btn-soft" onclick="skipWelcome()" style="width: 100%; margin-top: 8px;">
+          スキップ（メールなしで始める）
+        </button>
+      </div>
+    `;
+  } else if (type === 'weather') {
+    // 天気予報詳細
+    html = `
+      <div class="ol-icon">☀️</div>
+      <div class="ol-title">${kanaMode ? 'てんきよほう' : '天気予報'}</div>
+      <div class="ol-body" style="text-align: left;">
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">今日（1時間ごと）</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px;">
+            ${Array.from({length: 8}, (_, i) => {
+              const hour = 9 + i;
+              const temps = [16, 17, 18, 19, 20, 19, 18, 17];
+              const icons = ['☀️', '☀️', '⛅', '⛅', '☁️', '☁️', '🌤️', '🌤️'];
+              return `<div style="text-align: center; padding: 8px; background: var(--bg-soft); border-radius: 8px;">
+                <div style="font-size: 0.75rem; color: var(--text-sub);">${hour}時</div>
+                <div style="font-size: 1.5rem; margin: 4px 0;">${icons[i]}</div>
+                <div style="font-size: 0.85rem; font-weight: 600;">${temps[i]}°</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">週間天気</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${['明日', '明後日', '3日後', '4日後', '5日後', '6日後', '7日後'].map((day, i) => {
+              const icons = ['🌤️', '☀️', '⛅', '☁️', '🌧️', '⛅', '☀️'];
+              const high = [20, 22, 21, 18, 16, 19, 21][i];
+              const low = [12, 14, 13, 11, 10, 12, 13][i];
+              return `<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-soft); border-radius: 8px;">
+                <div style="flex: 1; font-size: 0.9rem;">${day}</div>
+                <div style="font-size: 1.5rem; margin: 0 12px;">${icons[i]}</div>
+                <div style="font-size: 0.85rem; font-weight: 600;">
+                  <span style="color: var(--rose);">${high}°</span> / <span style="color: var(--blue);">${low}°</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'calendar') {
+    // カレンダー + Google予定
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    html = `
+      <div class="ol-icon">📅</div>
+      <div class="ol-title">${year}年${month + 1}月</div>
+      <div class="ol-body" style="text-align: left;">
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px;">
+          ${['日', '月', '火', '水', '木', '金', '土'].map((d, i) => 
+            `<div style="text-align: center; font-size: 0.75rem; font-weight: 700; color: ${i === 0 ? 'var(--rose)' : i === 6 ? 'var(--blue)' : 'var(--text-sub)'}; padding: 4px;">${d}</div>`
+          ).join('')}
+          ${Array.from({length: firstDay}, () => '<div></div>').join('')}
+          ${Array.from({length: daysInMonth}, (_, i) => {
+            const day = i + 1;
+            const isToday = day === today.getDate();
+            return `<div style="text-align: center; padding: 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; ${isToday ? 'background: var(--green); color: white;' : 'background: var(--bg-soft); color: var(--text);'} cursor: pointer;" onclick="selectDate(${day})">${day}</div>`;
+          }).join('')}
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">今日の予定</div>
+          <div style="padding: 12px; background: var(--bg-soft); border-radius: 8px; margin-bottom: 8px;">
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text);">14:00 デイサービス</div>
+            <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 4px;">お迎えが来ます</div>
+          </div>
+          <div style="padding: 12px; background: var(--bg-soft); border-radius: 8px;">
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text);">18:30 夜の服薬</div>
+          </div>
+        </div>
+      </div>
+      <div class="ol-actions" style="flex-direction: column; width: 100%;">
+        <button class="ol-btn ol-btn-green" onclick="addEvent()" style="width: 100%;">➕ 予定を追加</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()" style="width: 100%; margin-top: 8px;">✕ ${kanaMode ? 'とじる' : '閉じる'}</button>
+      </div>
+    `;
+  } else if (type === 'add-event') {
+    // 予定追加
+    html = `
+      <div class="ol-icon">➕</div>
+      <div class="ol-title">予定を追加</div>
+      <div class="ol-body" style="text-align: left;">
+        <input type="text" id="eventTitle" placeholder="予定のタイトル" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+        <input type="date" id="eventDate" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+        <input type="time" id="eventTime" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+        <textarea id="eventNote" placeholder="メモ（任意）" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; min-height: 80px; resize: vertical;"></textarea>
+        <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
+          💡 音声でも追加できます：「予定を追加して：明日の午後2時に病院」
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="saveEvent()">✅ 保存</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ キャンセル</button>
+      </div>
+    `;
+  } else if (type === 'add-todo') {
+    // Todo追加
+    html = `
+      <div class="ol-icon">📝</div>
+      <div class="ol-title">Todoを追加</div>
+      <div class="ol-body" style="text-align: left;">
+        <input type="text" id="todoTitle" placeholder="やること" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+        <select id="todoPriority" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+          <option value="low">急がない</option>
+          <option value="medium" selected>普通</option>
+          <option value="high">急ぐ</option>
+        </select>
+        <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
+          💡 音声でも追加できます：「Todoに追加して：牛乳を買う」
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="saveTodo()">✅ 追加</button>
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ キャンセル</button>
+      </div>
+    `;
+  } else if (type === 'settings') {
+    // 設定画面
+    const currentAPIKey = getAPIKey();
+    const maskedKey = currentAPIKey ? '●●●●●●' + currentAPIKey.slice(-4) : '未設定';
+    
+    html = `
+      <div class="ol-icon">⚙️</div>
+      <div class="ol-title">設定</div>
+      <div class="ol-body" style="text-align: left; max-height: 70vh; overflow-y: auto;">
+        <div style="margin-bottom: 20px; padding: 16px; background: var(--amber-soft); border-radius: 10px;">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">🔐 Gemini APIキー</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px;">
+            AIチャット機能を使うには、Gemini APIキーが必要です<br>
+            現在: ${maskedKey}
+          </div>
+          <button onclick="openOverlay('api-key-setup')" style="width: 100%; padding: 12px; background: var(--amber); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;">
+            ${currentAPIKey ? '✏️ APIキーを変更' : '➕ APIキーを設定'}
+          </button>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">データ管理</div>
+          <button onclick="exportData()" style="width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 8px;">
+            💾 データをバックアップ
+          </button>
+          <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
+          <button onclick="document.getElementById('importFile').click()" style="width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+            📂 データを復元
+          </button>
+        </div>
+        <div style="margin-bottom: 20px; padding: 16px; background: var(--bg-soft); border-radius: 10px;">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">Google連携（オプション）</div>
+          <div style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px;">複数デバイスで同期したい場合のみ設定</div>
+          <button onclick="alert('Google連携は将来実装予定です')" style="width: 100%; padding: 12px; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+            🔗 Googleカレンダーと連携
+          </button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-quiet); text-align: center;">
+          データはこのスマホにのみ保存されます<br>
+          Google連携しなくても全機能が使えます
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ 閉じる</button>
+      </div>
+    `;
+  } else if (type === 'api-key-setup') {
+    // APIキー設定画面
+    html = `
+      <div class="ol-icon">🔐</div>
+      <div class="ol-title">Gemini APIキー設定</div>
+      <div class="ol-body" style="text-align: left;">
+        <div style="margin-bottom: 16px; padding: 12px; background: var(--blue-soft); border-radius: 8px; font-size: 0.85rem; color: var(--blue); line-height: 1.6;">
+          <strong>APIキーの取得方法：</strong><br>
+          1. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--blue); text-decoration: underline;">Google AI Studio</a> にアクセス<br>
+          2. 「Get API key」をクリック<br>
+          3. APIキーをコピー<br>
+          4. 下記に貼り付け
+        </div>
+        <input type="password" id="apiKeyInput" placeholder="AIza..." value="${getAPIKey()}" style="width: 100%; padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 12px; font-family: monospace;">
+        <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 16px;">
+          ⚠️ APIキーはこのスマホにのみ保存されます（安全）
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-green" onclick="saveAPIKey()">✅ 保存</button>
+        <button class="ol-btn ol-btn-soft" onclick="openOverlay('settings')">← 戻る</button>
+      </div>
+    `;
+  } else if (type === 'chat-window') {
+    // チャット画面
+    const chatType = arguments[1] || 'gemini';
+    const chatTitle = {
+      'wallbounce': '🤔 壁打ち・相談',
+      'gemini': '💬 雑談・心のサポート',
+      'ishihara': '🧠 認知症の相談'
+    }[chatType];
+    
+    // チャット履歴を表示
+    const history = chatHistory.filter(c => c.type === chatType).slice(-10);
+    let historyHTML = '';
+    history.forEach(msg => {
+      const align = msg.role === 'user' ? 'right' : 'left';
+      const bg = msg.role === 'user' ? 'var(--green-soft)' : 'var(--bg-soft)';
+      historyHTML += `
+        <div style="display: flex; justify-content: ${align === 'right' ? 'flex-end' : 'flex-start'}; margin-bottom: 12px;">
+          <div style="max-width: 75%; padding: 12px 16px; background: ${bg}; border-radius: 16px; font-size: 0.95rem; line-height: 1.6;">
+            ${msg.content}
+          </div>
+        </div>
+      `;
+    });
+    
+    html = `
+      <div class="ol-icon">${chatTitle.split(' ')[0]}</div>
+      <div class="ol-title">${chatTitle}</div>
+      <div class="ol-body" style="text-align: left;">
+        <div id="chatMessages" style="max-height: 50vh; overflow-y: auto; padding: 16px; background: var(--bg); border-radius: 10px; margin-bottom: 12px;">
+          ${historyHTML || '<div style="text-align: center; color: var(--text-quiet); padding: 20px;">会話を始めましょう</div>'}
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="chatInput" placeholder="メッセージを入力..." style="flex: 1; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px;" onkeypress="if(event.key==='Enter') sendChatMessage('${chatType}')">
+          <button onclick="sendChatMessage('${chatType}')" style="padding: 12px 20px; background: var(--green); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+            送信
+          </button>
+        </div>
+        <div style="margin-top: 12px; padding: 10px; background: var(--amber-soft); border-radius: 8px; font-size: 0.8rem; color: var(--amber); text-align: center;">
+          ⭐ ${getAPIKey() ? 'API利用中' : 'APIキーが未設定です（設定画面で登録）'}
+        </div>
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ 閉じる</button>
+      </div>
+    `;
+  } else if (type === 'log-history') {
+    // 記録履歴の表示
+    const allLogs = localLogs.slice().reverse().slice(0, 20);
+    let logsHTML = '';
+    
+    allLogs.forEach(log => {
+      logsHTML += `
+        <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-soft); border-radius: 8px;">
+          <div style="font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px;">${log.date} ${log.time}</div>
+          <div style="font-size: 0.95rem; color: var(--text); line-height: 1.6;">${log.content}</div>
+        </div>
+      `;
+    });
+    
+    html = `
+      <div class="ol-icon">📝</div>
+      <div class="ol-title">記録の履歴</div>
+      <div class="ol-body" style="text-align: left; max-height: 70vh; overflow-y: auto;">
+        ${logsHTML || '<div style="text-align: center; color: var(--text-quiet); padding: 20px;">まだ記録がありません</div>'}
+      </div>
+      <div class="ol-actions">
+        <button class="ol-btn ol-btn-soft" onclick="closeOverlayDirect()">✕ 閉じる</button>
+      </div>
+    `;
+  }
+
+  card.innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeOverlay(e) {
+  if (e.target.id === 'overlay') closeOverlayDirect();
+}
+
+function closeOverlayDirect() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function openMap() {
+  // 本番: Google Maps API で自宅までのルート
+  alert('Google Maps で自宅までの道案内を開きます');
+}
+
+function openPlaceMap(place) {
+  alert(place + 'までの道案内を開きます');
+  closeOverlayDirect();
+}
+
+function takeReceipt() {
+  // 本番: カメラAPIでレシート撮影 → OCR → 買い物リストに追加
+  alert('レシートの写真を撮りました。\n次回の買い物で参考にします（買いすぎ防止）');
+  closeOverlayDirect();
+}
+
+function callFamily() {
+  // 家族に電話
+  alert('家族に電話します');
+  closeOverlayDirect();
+}
+
+function openChat(type) {
+  // チャット画面を開く
+  closeOverlayDirect();
+  setTimeout(() => openOverlay('chat-window', type), 300);
+}
+
+function openMailDetail(index) {
+  // メール詳細表示（将来実装）
+  speak('メールを読み上げます');
+  closeOverlayDirect();
+}
+
+function sendMail() {
+  alert('メールを送信しました');
+  closeOverlayDirect();
+}
+
+function openYT(query) {
+  // YouTube検索
+  window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(query), '_blank');
+  closeOverlayDirect();
+}
+
+// ===== 初回起動：メールアドレス収集 =====
+function checkFirstVisit() {
+  const visited = localStorage.getItem('banso_visited');
+  if (!visited) {
+    // 初回訪問
+    setTimeout(() => {
+      openOverlay('welcome');
+    }, 2000); // 2秒後に表示
+  }
+}
+
+function saveEmailAndStart() {
+  const email = document.getElementById('userEmail').value.trim();
+  if (email) {
+    // ここでサーバーやGoogleフォームに送信（将来実装）
+    console.log('Email collected:', email);
+    alert('ありがとうございます！\nメールアドレスを登録しました。');
+  }
+  localStorage.setItem('banso_visited', 'true');
+  closeOverlayDirect();
+  speak('ようこそ！音声で操作できます。マイクボタンを押してみてください');
+}
+
+function skipWelcome() {
+  localStorage.setItem('banso_visited', 'true');
+  closeOverlayDirect();
+  speak('ようこそ！音声で操作できます。マイクボタンを押してみてください');
+}
+
+// ===== 数字ガイド表示切替 =====
+function toggleNumberGuide() {
+  showNumberGuide = !showNumberGuide;
+  const badges = document.querySelectorAll('.number-badge');
+  badges.forEach(badge => {
+    if (showNumberGuide) {
+      badge.classList.add('show');
+    } else {
+      badge.classList.remove('show');
+    }
+  });
+  document.getElementById('btnNum').classList.toggle('active');
+  localStorage.setItem('showNumberGuide', showNumberGuide);
+}
+
+// ===== ローカルストレージ管理 =====
+function loadLocalData() {
+  try {
+    localEvents = JSON.parse(localStorage.getItem(STORAGE_KEYS.EVENTS) || '[]');
+    localTodos = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODOS) || '[]');
+    localLogs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS) || '[]');
+    chatHistory = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHATS) || '[]');
+  } catch (e) {
+    console.error('データ読み込みエラー:', e);
+  }
+}
+
+function saveLocalData() {
+  try {
+    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(localEvents));
+    localStorage.setItem(STORAGE_KEYS.TODOS, JSON.stringify(localTodos));
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(localLogs));
+    localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify(chatHistory));
+  } catch (e) {
+    console.error('データ保存エラー:', e);
+  }
+}
+
+// APIキーの管理
+function getAPIKey() {
+  return localStorage.getItem(STORAGE_KEYS.API_KEY) || '';
+}
+
+function setAPIKey(key) {
+  localStorage.setItem(STORAGE_KEYS.API_KEY, key);
+}
+
+// ===== カレンダー関連 =====
+function selectDate(day) {
+  const today = new Date();
+  const selectedDate = new Date(today.getFullYear(), today.getMonth(), day);
+  const dateStr = selectedDate.toISOString().split('T')[0];
+  
+  const dayEvents = localEvents.filter(e => e.date === dateStr);
+  
+  if (dayEvents.length === 0) {
+    alert(`${day}日の予定はありません`);
+  } else {
+    let message = `${day}日の予定：\n\n`;
+    dayEvents.forEach(e => {
+      message += `${e.time} ${e.title}\n`;
+      if (e.note) message += `  ${e.note}\n`;
+    });
+    alert(message);
+  }
+}
+
+function addEvent() {
+  closeOverlayDirect();
+  setTimeout(() => openOverlay('add-event'), 300);
+}
+
+function saveEvent() {
+  const title = document.getElementById('eventTitle').value.trim();
+  const date = document.getElementById('eventDate').value;
+  const time = document.getElementById('eventTime').value;
+  const note = document.getElementById('eventNote').value.trim();
+  
+  if (!title || !date || !time) {
+    alert('タイトル、日付、時間を入力してください');
+    return;
+  }
+  
+  // ローカルに保存
+  const newEvent = {
+    id: Date.now(),
+    title,
+    date,
+    time,
+    note,
+    createdAt: new Date().toISOString()
+  };
+  
+  localEvents.push(newEvent);
+  saveLocalData();
+  
+  speak(`予定を追加しました。${title}`);
+  alert(`予定を追加しました：\n${title}\n${date} ${time}`);
+  closeOverlayDirect();
+  
+  // カレンダー表示を更新
+  updateCalendarView();
+}
+
+function saveTodo() {
+  const title = document.getElementById('todoTitle').value.trim();
+  const priority = document.getElementById('todoPriority').value;
+  
+  if (!title) {
+    alert('やることを入力してください');
+    return;
+  }
+  
+  // ローカルに保存
+  const newTodo = {
+    id: Date.now(),
+    title,
+    priority,
+    completed: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  localTodos.push(newTodo);
+  saveLocalData();
+  
+  speak(`Todoを追加しました。${title}`);
+  alert(`Todoを追加しました：\n${title}`);
+  closeOverlayDirect();
+  
+  // Todo表示を更新
+  updateTodoView();
+}
+
+function toggleTodo(id) {
+  const todo = localTodos.find(t => t.id === id);
+  if (todo) {
+    todo.completed = !todo.completed;
+    saveLocalData();
+    updateTodoView();
+  }
+}
+
+function deleteTodo(id) {
+  if (confirm('このTodoを削除しますか？')) {
+    localTodos = localTodos.filter(t => t.id !== id);
+    saveLocalData();
+    updateTodoView();
+  }
+}
+
+// ===== 記録（ライフログ）関連 =====
+function addQuickLog(text) {
+  const textarea = document.getElementById('logContent');
+  if (textarea) {
+    textarea.value = text;
+  }
+}
+
+function saveLog() {
+  const content = document.getElementById('logContent').value.trim();
+  
+  if (!content) {
+    alert('記録する内容を入力してください');
+    return;
+  }
+  
+  const newLog = {
+    id: Date.now(),
+    content,
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toTimeString().split(' ')[0].substring(0, 5),
+    createdAt: new Date().toISOString()
+  };
+  
+  localLogs.push(newLog);
+  saveLocalData();
+  
+  speak('記録しました');
+  alert('記録しました！');
+  closeOverlayDirect();
+  
+  // 記録表示を更新
+  updateLogView();
+}
+
+function updateLogView() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayLogs = localLogs.filter(l => l.date === today).sort((a, b) => b.time.localeCompare(a.time));
+  
+  let html = '';
+  if (todayLogs.length === 0) {
+    html = '<div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">まだ記録がありません</div>';
+  } else {
+    html = '<div style="padding: 16px 22px;">';
+    todayLogs.forEach(log => {
+      html += `
+        <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-soft); border-radius: 8px;">
+          <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 4px;">${log.time}</div>
+          <div style="font-size: 0.95rem; color: var(--text); line-height: 1.6;">${log.content}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  }
+  
+  const logCard = document.getElementById('card3');
+  if (logCard) {
+    const body = logCard.querySelector('.card-body');
+    if (body) body.innerHTML = html;
+  }
+}
+
+// ===== APIキー設定 =====
+function saveAPIKey() {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  
+  if (!apiKey) {
+    alert('APIキーを入力してください');
+    return;
+  }
+  
+  if (!apiKey.startsWith('AIza')) {
+    if (!confirm('このAPIキーは正しくない可能性があります。保存しますか？')) {
+      return;
+    }
+  }
+  
+  setAPIKey(apiKey);
+  alert('APIキーを保存しました');
+  openOverlay('settings');
+}
+
+// ===== チャット機能 =====
+async function sendChatMessage(chatType) {
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  const apiKey = getAPIKey();
+  if (!apiKey) {
+    alert('APIキーが設定されていません。\n設定画面でAPIキーを登録してください。');
+    return;
+  }
+  
+  // ユーザーメッセージを追加
+  chatHistory.push({
+    type: chatType,
+    role: 'user',
+    content: message,
+    timestamp: new Date().toISOString()
+  });
+  
+  // 入力をクリア
+  input.value = '';
+  
+  // メッセージを表示
+  displayChatMessage('user', message);
+  
+  // AI応答を取得（デモ）
+  const response = await getChatResponse(message, chatType, apiKey);
+  
+  // AI応答を追加
+  chatHistory.push({
+    type: chatType,
+    role: 'assistant',
+    content: response,
+    timestamp: new Date().toISOString()
+  });
+  
+  saveLocalData();
+  displayChatMessage('assistant', response);
+}
+
+function displayChatMessage(role, content) {
+  const messagesDiv = document.getElementById('chatMessages');
+  const align = role === 'user' ? 'right' : 'left';
+  const bg = role === 'user' ? 'var(--green-soft)' : 'var(--bg-soft)';
+  
+  const messageHTML = `
+    <div style="display: flex; justify-content: ${align === 'right' ? 'flex-end' : 'flex-start'}; margin-bottom: 12px;">
+      <div style="max-width: 75%; padding: 12px 16px; background: ${bg}; border-radius: 16px; font-size: 0.95rem; line-height: 1.6;">
+        ${content}
+      </div>
+    </div>
+  `;
+  
+  messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function getChatResponse(message, chatType, apiKey) {
+  try {
+    // Gemini API呼び出し
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: message
+          }]
+        }]
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('API呼び出しエラー');
+    }
+    
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+    
+  } catch (error) {
+    console.error('Chat error:', error);
+    return 'エラーが発生しました。APIキーが正しいか確認してください。';
+  }
+}
+
+// ===== データのバックアップ・復元 =====
+function exportData() {
+  const data = {
+    events: localEvents,
+    todos: localTodos,
+    logs: localLogs,
+    chats: chatHistory,
+    exportedAt: new Date().toISOString()
+  };
+  
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `banso-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  alert('データをバックアップしました');
+}
+
+function importData(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (confirm('データを復元しますか？現在のデータは上書きされます。')) {
+        localEvents = data.events || [];
+        localTodos = data.todos || [];
+        localLogs = data.logs || [];
+        chatHistory = data.chats || [];
+        saveLocalData();
         
-        // プラットフォーム検出
-        function detectPlatform() {
-            const ua = navigator.userAgent;
-            const platform = navigator.platform;
-            let platformName = 'その他';
-            let platformIcon = '📱';
-            
-            if (/iPad|iPhone|iPod/.test(ua)) {
-                platformName = 'iPhone/iPad';
-                platformIcon = '📱';
-                document.getElementById('iosInstructions').style.display = 'block';
-                document.getElementById('androidInstructions').style.display = 'none';
-                document.getElementById('pcInstructions').style.display = 'none';
-            } else if (/Android/.test(ua)) {
-                platformName = 'Android';
-                platformIcon = '🤖';
-                document.getElementById('iosInstructions').style.display = 'none';
-                document.getElementById('androidInstructions').style.display = 'block';
-                document.getElementById('pcInstructions').style.display = 'none';
-            } else if (/Win|Mac|Linux/.test(platform)) {
-                platformName = 'パソコン';
-                platformIcon = '💻';
-                document.getElementById('iosInstructions').style.display = 'none';
-                document.getElementById('androidInstructions').style.display = 'none';
-                document.getElementById('pcInstructions').style.display = 'block';
-            }
-            
-            document.getElementById('platformIcon').textContent = platformIcon;
-            document.getElementById('platformText').innerHTML = `
-                <strong>${platformName}</strong>でご利用中<br>
-                <small style="color: #666;">このデバイスに最適な方法でインストールできます</small>
-            `;
-        }
-
-        // PWAインストール対応
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // インストールボタンを表示
-            const installButton = document.getElementById('installButton');
-            installButton.style.display = 'block';
-            
-            installButton.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    
-                    if (outcome === 'accepted') {
-                        showSuccessMessage();
-                    }
-                    
-                    deferredPrompt = null;
-                    installButton.style.display = 'none';
-                }
-            });
-        });
-
-        // インストール済みの場合
-        window.addEventListener('appinstalled', () => {
-            showSuccessMessage();
-        });
-
-        // 成功メッセージ表示
-        function showSuccessMessage() {
-            const message = document.createElement('div');
-            message.className = 'success-message';
-            message.innerHTML = '✅ インストール完了！<br>ホーム画面から起動できます';
-            document.querySelector('.container').insertBefore(
-                message, 
-                document.querySelector('.welcome-card')
-            );
-            
-            setTimeout(() => {
-                startSetup();
-            }, 2000);
-        }
-
-        // インストール方法を表示
-        function showInstructions() {
-            document.getElementById('instructionsSection').classList.remove('hidden');
-            document.getElementById('instructionsSection').scrollIntoView({ 
-                behavior: 'smooth' 
-            });
-        }
-
-        // セットアップ開始
-        function startSetup() {
-            // 初回起動フラグを設定
-            localStorage.setItem('firstTime', 'true');
-            window.location.href = 'settings.html';
-        }
-
-        // 初期化
-        detectPlatform();
+        updateCalendarView();
+        updateTodoView();
+        updateLogView();
         
-        // すでにインストール済みか確認
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
-            document.getElementById('platformInfo').innerHTML = `
-                <div class="platform-icon">✅</div>
-                <div><strong>アプリとして起動中</strong><br>
-                <small style="color: #666;">インストール済みです</small></div>
-            `;
-        }
-    </script>
+        alert('データを復元しました');
+      }
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function updateCalendarView() {
+  // カレンダーカードの予定を更新
+  const today = new Date().toISOString().split('T')[0];
+  const todayEvents = localEvents.filter(e => e.date === today).sort((a, b) => a.time.localeCompare(b.time));
+  
+  let html = '';
+  if (todayEvents.length === 0) {
+    html = '<div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">今日の予定はありません</div>';
+  } else {
+    html = '<div style="padding: 16px 22px;">';
+    todayEvents.forEach(event => {
+      html += `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: var(--bg-soft); border-radius: 8px;">
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">${event.time}</div>
+          <div style="flex: 1;">
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">${event.title}</div>
+            ${event.note ? `<div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 2px;">${event.note}</div>` : ''}
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  }
+  
+  const calCard = document.getElementById('card1');
+  if (calCard) {
+    const body = calCard.querySelector('.card-body');
+    if (body) body.innerHTML = html;
+  }
+}
+
+function updateTodoView() {
+  const incompleteTodos = localTodos.filter(t => !t.completed).sort((a, b) => {
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+  
+  let html = '';
+  if (incompleteTodos.length === 0) {
+    html = '<div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">やることはありません</div>';
+  } else {
+    html = '<div style="padding: 16px 22px;">';
+    incompleteTodos.forEach(todo => {
+      const priorityColors = {
+        high: 'var(--rose)',
+        medium: 'var(--amber)',
+        low: 'var(--green)'
+      };
+      const priorityLabels = {
+        high: '🔴',
+        medium: '🟡',
+        low: '🟢'
+      };
+      html += `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: var(--bg-soft); border-radius: 8px;">
+          <input type="checkbox" onchange="toggleTodo(${todo.id})" style="width: 20px; height: 20px; cursor: pointer;">
+          <span style="font-size: 1rem;">${priorityLabels[todo.priority]}</span>
+          <div style="flex: 1; font-size: 0.95rem; font-weight: 500; color: var(--text);">${todo.title}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  }
+  
+  const todoCard = document.getElementById('card2');
+  if (todoCard) {
+    const body = todoCard.querySelector('.card-body');
+    if (body) body.innerHTML = html;
+  }
+}
+
+// ===== 音声認識 =====
+function initVoiceRecognition() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    console.log('音声認識は非対応のブラウザです');
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    isListening = true;
+    document.getElementById('voiceFab').classList.add('listening');
+    document.getElementById('voiceBanner').classList.add('show');
+  };
+
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById('voiceText').textContent = '「' + transcript + '」';
+    processVoiceCommand(transcript);
+  };
+
+  recognition.onerror = function(event) {
+    console.log('音声認識エラー:', event.error);
+    stopVoice();
+  };
+
+  recognition.onend = function() {
+    stopVoice();
+  };
+}
+
+function toggleVoice() {
+  const voiceBtn = document.querySelector('[data-i18n="btn-voice"]').closest('.action-btn');
+  if (isListening) {
+    stopVoice();
+    voiceBtn.style.background = 'linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%)';
+  } else {
+    startVoice();
+    voiceBtn.style.background = 'linear-gradient(135deg, var(--rose) 0%, #A04545 100%)';
+  }
+}
+
+function startVoice() {
+  if (!recognition) {
+    alert('音声認識が利用できません。Chrome/Safari/Edgeをお使いください。');
+    return;
+  }
+  recognition.start();
+}
+
+function stopVoice() {
+  isListening = false;
+  document.getElementById('voiceFab').classList.remove('listening');
+  setTimeout(() => {
+    document.getElementById('voiceBanner').classList.remove('show');
+  }, 1500);
+}
+
+function processVoiceCommand(text) {
+  const normalized = text.toLowerCase().replace(/\s/g, '');
+  
+  // コマンドマッチング
+  for (let num in VOICE_COMMANDS) {
+    const cmd = VOICE_COMMANDS[num];
+    for (let keyword of cmd.keywords) {
+      if (normalized.includes(keyword)) {
+        speak(cmd.label + 'を開きます');
+        executeCommand(parseInt(num));
+        return;
+      }
+    }
+  }
+
+  // 特殊コマンド：メール
+  if (normalized.includes('メール') && (normalized.includes('読') || normalized.includes('よ'))) {
+    speak('メールを読み上げます');
+    readMail();
+    return;
+  }
+
+  if (normalized.includes('返信') || normalized.includes('へんしん')) {
+    speak('メールの返信を考えます');
+    openOverlay('mail-reply');
+    return;
+  }
+
+  // 特殊コマンド：予定追加
+  if ((normalized.includes('予定') || normalized.includes('よてい')) && 
+      (normalized.includes('追加') || normalized.includes('ついか') || normalized.includes('つくっ'))) {
+    speak('予定を追加します');
+    openOverlay('add-event');
+    return;
+  }
+
+  // 特殊コマンド：Todo追加
+  if ((normalized.includes('todo') || normalized.includes('とぅーどぅー') || normalized.includes('やること')) && 
+      (normalized.includes('追加') || normalized.includes('ついか'))) {
+    speak('Todoを追加します');
+    openOverlay('add-todo');
+    return;
+  }
+
+  // 特殊コマンド：天気
+  if (normalized.includes('天気') || normalized.includes('てんき')) {
+    speak('天気予報を表示します');
+    openOverlay('weather');
+    return;
+  }
+
+  // 特殊コマンド：カレンダー
+  if (normalized.includes('カレンダー') || normalized.includes('かれんだー')) {
+    speak('カレンダーを開きます');
+    openOverlay('calendar');
+    return;
+  }
+
+  // 特殊コマンド：記録
+  if ((normalized.includes('記録') || normalized.includes('きろく')) && 
+      (normalized.includes('して') || normalized.includes('した'))) {
+    const match = text.match(/記録[：:して]*(.+)/i);
+    if (match && match[1]) {
+      const logContent = match[1].trim();
+      const newLog = {
+        id: Date.now(),
+        content: logContent,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        createdAt: new Date().toISOString()
+      };
+      localLogs.push(newLog);
+      saveLocalData();
+      updateLogView();
+      speak('記録しました');
+      return;
+    }
+  }
+
+  // 聞き取れなかった
+  speak('もう一度、ゆっくり話してください');
+  setTimeout(() => startVoice(), 1500);
+}
+
+function executeCommand(num) {
+  const cmd = VOICE_COMMANDS[num];
+  if (!cmd) return;
+
+  switch(cmd.action) {
+    case 'home':
+      if (currentMode === 'out') openMap();
+      else speak('今は在宅モードです');
+      break;
+    case 'log':
+      openOverlay('log');
+      break;
+    case 'video':
+      openOverlay('video');
+      break;
+    case 'call':
+      openOverlay('call');
+      break;
+    case 'mail':
+      readMail();
+      break;
+    case 'chat':
+      openOverlay('chat');
+      break;
+    case 'schedule':
+      readSchedule();
+      break;
+    case 'places':
+      openOverlay('places');
+      break;
+    case 'idcard':
+      openOverlay('idcard');
+      break;
+  }
+}
+
+function speak(text) {
+  if (!synthesis) return;
+  synthesis.cancel(); // 既存の発話を停止
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ja-JP';
+  utterance.rate = 0.9; // ゆっくり
+  utterance.pitch = 1.1; // 少し高め（優しい声）
+  synthesis.speak(utterance);
+}
+
+function readMail() {
+  // デモ：最新メールを読み上げ
+  speak('太郎さんから、週末遊びに行くね、というメールです。土曜日の昼頃着くよ。何か食べたいものある？');
+}
+
+function readSchedule() {
+  // デモ：今日の予定を読み上げ
+  speak('今日の予定です。午後2時、デイサービス。お迎えが来ます。午後6時30分、夜の服薬です。');
+}
+
+// キーボード対応（数字キー）
+document.addEventListener('keydown', function(e) {
+  const num = parseInt(e.key);
+  if (num >= 1 && num <= 9) {
+    executeCommand(num);
+  }
+});
+
+// 数字パッド表示切替
+function toggleNumpad() {
+  document.getElementById('numpad').classList.toggle('show');
+}
+
+// ===== 初期化 =====
+// デフォルトで大きめ文字（Fire TVレベル）・漢字モードに設定
+document.body.classList.add(textLevels[textLevel]); // text-md (154%)
+document.getElementById('btnText').classList.add('active'); // 文字サイズ変更されている
+document.getElementById('btnKana').classList.add('active'); // 漢字モード（「ひ」で切替可能）
+
+// ローカルデータの読み込み
+loadLocalData();
+
+// 音声認識初期化
+initVoiceRecognition();
+
+// 初回訪問チェック
+checkFirstVisit();
+
+// 数字ガイドの設定を復元
+const savedGuide = localStorage.getItem('showNumberGuide');
+if (savedGuide !== null) {
+  showNumberGuide = savedGuide === 'true';
+  if (!showNumberGuide) {
+    document.querySelectorAll('.number-badge').forEach(b => b.classList.remove('show'));
+  }
+}
+
+// 30秒後に点滅を停止
+setTimeout(() => {
+  document.querySelectorAll('.number-badge').forEach(badge => {
+    badge.classList.remove('blink');
+    badge.classList.add('blink-stop');
+  });
+}, 30000);
+
+updateClock();
+applyI18N();
+setInterval(updateClock, 1000);
+demoGPS();
+
+// カレンダー・Todo・記録の表示を更新
+updateCalendarView();
+updateTodoView();
+updateLogView();
+</script>
+
 </body>
 </html>
