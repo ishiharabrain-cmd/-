@@ -16,53 +16,57 @@
 /* 5. Google完全連携（同期前提） */
 
 :root {
-  /* アクセシビリティ改善：コントラスト強化 */
-  --bg: #FEFCF6;
+  /* ユニバーサルデザイン：コントラスト・色覚配慮 */
+  --bg: #F8F6F1;
   --bg-card: #FFFFFF;
-  --bg-soft: #F5F2E8;
-  --bg-accent: #FFF5E0;
-  --text: #2A2419; /* より濃く */
-  --text-sub: #5A5248; /* より濃く */
-  --text-quiet: #8A8270; /* より濃く */
-  --green: #4A7549; /* より濃く */
-  --green-soft: #E5F0E5;
-  --amber: #A36830; /* より濃く */
-  --amber-soft: #FFF0D8;
-  --blue: #3D5F8A; /* より濃く */
-  --blue-soft: #E5EDF8;
-  --rose: #A04545; /* より濃く */
-  --rose-soft: #FBE5E5;
-  --border: #D8D0C0; /* より濃く */
-  --shadow-sm: 0 1px 4px rgba(42,36,25,0.08);
-  --shadow-md: 0 4px 20px rgba(42,36,25,0.12);
-  --r: 18px;
+  --bg-soft: #EFEDE8;
+  --bg-accent: #FFF8EE;
+  --text: #1C1B18;
+  --text-sub: #4A4845;
+  --text-quiet: #6B6966;
+  --green: #2D6B2C;
+  --green-soft: #E2EDE2;
+  --amber: #8B5E2A;
+  --amber-soft: #F5EDE0;
+  --blue: #2C5282;
+  --blue-soft: #E2EAF3;
+  --rose: #9B3A3A;
+  --rose-soft: #F5E2E2;
+  --border: #C8C4BC;
+  --shadow-sm: 0 1px 3px rgba(28,27,24,0.06);
+  --shadow-md: 0 4px 16px rgba(28,27,24,0.08);
+  --r: 16px;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .theme-night {
-  --bg: #1C1B1F;
-  --bg-card: #262529;
-  --bg-soft: #2C2B30;
-  --text: #E5E0D8;
-  --text-sub: #9A9288;
-  --border: #3A3832;
-  /* あいさつ・おしゃべりボタン用：背景を暗くして文字を見やすく */
-  --rose-soft: #4A3030;
-  --rose: #D08080;
-  --amber-soft: #4A4030;
-  --amber: #D0A850;
+  --bg: #1A1A1D;
+  --bg-card: #242428;
+  --bg-soft: #2E2E32;
+  --text: #E8E6E1;
+  --text-sub: #A8A6A1;
+  --text-quiet: #7A7874;
+  --border: #404044;
+  --green: #5A9B59;
+  --green-soft: #2A3D2A;
+  --amber: #C9A755;
+  --amber-soft: #3D3528;
+  --rose: #C97070;
+  --rose-soft: #3D2A2A;
+  --blue: #6B9BC9;
+  --blue-soft: #2A3240;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { font-size: 16px; }
 
-/* 文字サイズ5段階（デフォルトはFire TVレベル）全体的に4pt大きく */
-.text-xs { font-size: 109%; }
-.text-sm { font-size: 129%; }
-.text-md { font-size: 154%; }
-.text-lg { font-size: 184%; }
-.text-xl { font-size: 224%; }
+/* 文字サイズ5段階（バランス重視） */
+.text-xs { font-size: 0.9375rem; line-height: 1.5; }
+.text-sm { font-size: 1.0625rem; line-height: 1.5; }
+.text-md { font-size: 1.125rem; line-height: 1.55; }
+.text-lg { font-size: 1.3125rem; line-height: 1.5; }
+.text-xl { font-size: 1.5625rem; line-height: 1.4; }
 
 body {
   font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', sans-serif;
@@ -79,8 +83,8 @@ body {
   display: grid;
   grid-template-rows: auto 1fr auto;
   height: 100vh;
-  padding: 20px 24px;
-  gap: 16px;
+  padding: 14px 18px;
+  gap: 12px;
 }
 
 /* ===== ヘッダー ===== */
@@ -159,6 +163,9 @@ body {
 .wd-sun { background: #FDDEDE; color: #B84C4C; }
 .wd-sat { background: #DDEAFB; color: #4C6EB8; }
 .wd-week { background: var(--green-soft); color: var(--green); }
+.theme-night .wd-sun { background: #4A3030; color: #E8A0A0; }
+.theme-night .wd-sat { background: #2A3240; color: #A0B8E8; }
+.theme-night .wd-week { background: var(--green-soft); color: var(--green); }
 
 .header-right {
   display: flex;
@@ -241,7 +248,8 @@ body {
 
 .settings-dots {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .dot-btn {
@@ -257,17 +265,42 @@ body {
   justify-content: center;
   transition: all 0.2s var(--ease);
   color: var(--text-sub);
-  opacity: 0.6;
+  opacity: 0.85;
 }
 
 .dot-btn:hover, .dot-btn.active { opacity: 1; border-color: var(--green); }
 
-/* ===== メインエリア ===== */
+/* 昼/夜モード切替（主画面で分かりやすく） */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  color: var(--text-sub);
+}
+
+.theme-toggle:hover { border-color: var(--green); color: var(--text); }
+.theme-toggle .theme-label { margin-left: 4px; }
+.theme-toggle.active-day { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.theme-toggle.active-night { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); }
+.theme-toggle.active-night .theme-icon { filter: brightness(1.2); }
+
+/* ===== メインエリア（スクロール可能） ===== */
 .main {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr;
   gap: 16px;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   transition: all 0.3s var(--ease);
 }
 
@@ -417,36 +450,43 @@ body {
   .go-home-text { text-align: center; }
 }
 
-/* ===== ボトムバー ===== */
+/* ===== ボトムバー（すっきりレイアウト） ===== */
 .bottom {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: 4px 0;
+  padding: 10px 0;
+  max-width: 100%;
+}
+
+@media (min-width: 600px) {
+  .bottom { grid-template-columns: repeat(7, 1fr); }
 }
 
 .action-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 14px 24px;
-  border: 2px solid var(--border);
-  border-radius: 14px;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
   background: var(--bg-card);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  transition: all 0.25s var(--ease);
-  box-shadow: var(--shadow-sm);
+  transition: all 0.2s var(--ease);
+  min-height: 64px;
+  position: relative;
 }
 
-.action-btn:active { transform: scale(0.96); }
-.action-btn:hover { border-color: var(--green); box-shadow: var(--shadow-md); }
+.action-btn:active { transform: scale(0.97); }
+.action-btn:hover { border-color: var(--green); background: var(--green-soft); }
 
-.action-btn-icon { font-size: 1.3rem; }
+.action-btn-icon { font-size: 1.5rem; line-height: 1; }
 
 .action-primary {
   background: var(--green);
@@ -454,7 +494,18 @@ body {
   color: white;
 }
 
-.action-primary:hover { background: #4E7C4D; }
+.action-primary:hover { background: #256324; border-color: #256324; }
+
+.action-btn-idcard { background: var(--rose-soft); border-color: var(--rose); color: var(--rose); }
+.action-btn-idcard:hover { background: var(--rose); color: white; }
+
+.action-btn-voice { background: var(--green); border-color: var(--green); color: white; }
+.action-btn-voice:hover { background: #256324; }
+
+.action-btn-chat { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.action-btn-chat:hover { background: var(--amber); color: white; }
+
+.action-btn-voice.listening { background: var(--rose) !important; border-color: var(--rose) !important; color: white !important; }
 
 /* ===== オーバーレイ ===== */
 .overlay {
@@ -791,11 +842,15 @@ body {
         </div>
         <div class="weather-advice" id="clothAdvice">コートを着てね</div>
       </div>
+      <!-- 昼/夜モード（主画面で切り替え） -->
+      <button type="button" class="theme-toggle active-day" id="btnNight" onclick="toggleNight()" title="昼/夜モード切替">
+        <span class="theme-icon" id="themeIcon">☀️</span>
+        <span class="theme-label" id="themeLabel">昼</span>
+      </button>
       <!-- 設定 -->
       <div class="settings-dots">
         <button class="dot-btn" onclick="cycleTextSize()" title="文字サイズ" id="btnText">あ</button>
         <button class="dot-btn" onclick="toggleKana()" title="ひらがな" id="btnKana">ひ</button>
-        <button class="dot-btn" onclick="toggleNight()" title="夜モード" id="btnNight">🌙</button>
         <button class="dot-btn" onclick="openOverlay('settings')" title="設定" id="btnSettings">⚙️</button>
       </div>
     </div>
@@ -942,47 +997,35 @@ body {
 
   <!-- ===== ボトム ===== -->
   <footer class="bottom" id="bottomBar">
-    <button class="action-btn action-primary" onclick="openOverlay('log')" style="position: relative;">
-      <span class="number-badge show blink" id="badge-2">2</span>
+    <button type="button" class="action-btn action-primary" onclick="openOverlay('log')">
       <span class="action-btn-icon">📝</span>
-      <span data-i18n="btn-log">記録する</span>
+      <span data-i18n="btn-log">記録</span>
     </button>
-    <!-- あいさつボタン（迷子札） -->
-    <button class="action-btn" onclick="openOverlay('idcard')" style="background: var(--rose-soft); border-color: var(--rose); position: relative;">
-      <span class="number-badge show blink" id="badge-9">9</span>
+    <button type="button" class="action-btn action-btn-idcard" onclick="openOverlay('idcard')">
       <span class="action-btn-icon">🆔</span>
       <span data-i18n="btn-idcard">あいさつ</span>
     </button>
-    <!-- 音声ボタン（あいさつの右側、右利き用） -->
-    <button class="action-btn" onclick="toggleVoice()" style="background: linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%); border-color: var(--green); color: white; position: relative;">
-      <span class="number-badge show blink" id="badge-voice" style="background: white; color: var(--green);">🎤</span>
+    <button type="button" class="action-btn action-btn-voice" onclick="toggleVoice()">
       <span class="action-btn-icon">🎤</span>
       <span data-i18n="btn-voice">音声</span>
     </button>
-    <button class="action-btn" onclick="openOverlay('call')" style="position: relative;">
-      <span class="number-badge show blink" id="badge-4">4</span>
+    <button type="button" class="action-btn" onclick="openOverlay('call')">
       <span class="action-btn-icon">📞</span>
       <span data-i18n="btn-call">電話</span>
     </button>
-    <button class="action-btn" onclick="openOverlay('video')" style="position: relative;">
-      <span class="number-badge show blink" id="badge-3">3</span>
+    <button type="button" class="action-btn" onclick="openOverlay('video')">
       <span class="action-btn-icon">📺</span>
       <span data-i18n="btn-video">動画</span>
     </button>
-    <button class="action-btn" onclick="openOverlay('places')" style="position: relative;">
-      <span class="number-badge show blink" id="badge-8">8</span>
+    <button type="button" class="action-btn" onclick="openOverlay('places')">
       <span class="action-btn-icon">🗺️</span>
       <span data-i18n="btn-places">場所</span>
     </button>
-    <!-- おしゃべりボタン（一番右、有料マーク） -->
-    <button class="action-btn" onclick="openOverlay('chat')" style="background: var(--amber-soft); border-color: var(--amber); position: relative;">
-      <span class="number-badge show blink" id="badge-6">6</span>
+    <button type="button" class="action-btn action-btn-chat" onclick="openOverlay('chat')">
       <span class="action-btn-icon">💬</span>
       <span data-i18n="btn-chat">おしゃべり</span>
-      <span style="position: absolute; top: -6px; right: -6px; background: var(--amber); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; font-weight: 700;">⭐有料</span>
     </button>
-    <!-- 外出モードで追加 -->
-    <button class="action-btn" id="btnReceipt" style="display: none; position: relative;" onclick="openOverlay('receipt')">
+    <button type="button" class="action-btn" id="btnReceipt" style="display: none;" onclick="openOverlay('receipt')">
       <span class="action-btn-icon">📷</span>
       <span data-i18n="btn-receipt">レシート</span>
     </button>
@@ -1180,7 +1223,16 @@ function toggleKana() {
 
 function toggleNight() {
   nightForced = !nightForced;
-  document.getElementById('btnNight').classList.toggle('active', nightForced);
+  const btn = document.getElementById('btnNight');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (btn) {
+    btn.classList.toggle('active-day', !nightForced);
+    btn.classList.toggle('active-night', nightForced);
+    btn.setAttribute('title', nightForced ? '昼モードにする' : '夜モードにする');
+  }
+  if (icon) icon.textContent = nightForced ? '🌙' : '☀️';
+  if (label) label.textContent = nightForced ? '夜' : '昼';
   if (nightForced) {
     document.body.classList.add('theme-night');
   } else {
@@ -2271,8 +2323,12 @@ function initVoiceRecognition() {
 
   recognition.onstart = function() {
     isListening = true;
-    document.getElementById('voiceFab').classList.add('listening');
-    document.getElementById('voiceBanner').classList.add('show');
+    const fab = document.getElementById('voiceFab');
+    if (fab) fab.classList.add('listening');
+    const voiceBtn = document.querySelector('[data-i18n="btn-voice"]') && document.querySelector('[data-i18n="btn-voice"]').closest('.action-btn');
+    if (voiceBtn) voiceBtn.classList.add('listening');
+    const banner = document.getElementById('voiceBanner');
+    if (banner) banner.classList.add('show');
   };
 
   recognition.onresult = function(event) {
@@ -2311,13 +2367,13 @@ function initVoiceRecognition() {
 }
 
 function toggleVoice() {
-  const voiceBtn = document.querySelector('[data-i18n="btn-voice"]').closest('.action-btn');
+  const voiceBtn = document.querySelector('[data-i18n="btn-voice"]') && document.querySelector('[data-i18n="btn-voice"]').closest('.action-btn');
   if (isListening) {
     stopVoice();
-    voiceBtn.style.background = 'linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%)';
+    if (voiceBtn) voiceBtn.classList.remove('listening');
   } else {
     startVoice();
-    voiceBtn.style.background = 'linear-gradient(135deg, var(--rose) 0%, #A04545 100%)';
+    if (voiceBtn) voiceBtn.classList.add('listening');
   }
 }
 
@@ -2336,9 +2392,13 @@ function startVoiceForOverlay(type) {
 
 function stopVoice() {
   isListening = false;
-  document.getElementById('voiceFab').classList.remove('listening');
+  const fab = document.getElementById('voiceFab');
+  if (fab) fab.classList.remove('listening');
+  const voiceBtn = document.querySelector('[data-i18n="btn-voice"]') && document.querySelector('[data-i18n="btn-voice"]').closest('.action-btn');
+  if (voiceBtn) voiceBtn.classList.remove('listening');
   setTimeout(() => {
-    document.getElementById('voiceBanner').classList.remove('show');
+    const banner = document.getElementById('voiceBanner');
+    if (banner) banner.classList.remove('show');
   }, 1500);
 }
 
