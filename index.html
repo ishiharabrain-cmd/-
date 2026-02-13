@@ -46,6 +46,11 @@
   --text: #E5E0D8;
   --text-sub: #9A9288;
   --border: #3A3832;
+  /* あいさつ・おしゃべりボタン用：背景を暗くして文字を見やすく */
+  --rose-soft: #4A3030;
+  --rose: #D08080;
+  --amber-soft: #4A4030;
+  --amber: #D0A850;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -503,6 +508,57 @@ body {
 .ol-btn-green { background: var(--green); color: white; }
 .ol-btn-soft { background: var(--bg-soft); color: var(--text-sub); }
 
+/* オーバーレイ内の音声ボタン */
+.voice-inline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--green) 0%, #4E7C4D 100%);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(74, 117, 73, 0.35);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.voice-inline-btn:active { transform: scale(0.96); }
+
+/* カード下のプラスボタン（今日の予定・やること・今日の記録） */
+.card-plus-row {
+  padding: 14px 22px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.card-plus-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: 2px dashed var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  min-width: 140px;
+}
+.card-plus-btn:hover {
+  background: var(--green);
+  color: white;
+  border-style: solid;
+  transform: scale(1.02);
+}
+.card-plus-btn:active { transform: scale(0.98); }
+.card-plus-btn .plus-icon { font-size: 1.4rem; }
+
 /* GPS通知バナー */
 .gps-banner {
   position: fixed;
@@ -751,12 +807,12 @@ body {
     <!-- 在宅モードのカード（通常3カラム） -->
     <div class="card" id="card1">
       <div class="card-head">
-        <div class="card-label"><span>📅</span> <span data-i18n="cal">きょうの よてい</span></div>
-        <span class="card-badge badge-green">Google</span>
+        <div class="card-label"><span>📅</span> <span data-i18n="cal">さいきんの よてい</span></div>
+        <button onclick="openOverlay('add-event')" style="background: var(--green); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--ease);" title="予定を追加">➕</button>
       </div>
       <div class="card-body">
         <div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">
-          Googleカレンダーと同期します
+          読み込み中…
         </div>
       </div>
     </div>
@@ -939,9 +995,9 @@ body {
   📍 スーパーに着きました<br>買い物リストを見ますか？
 </div>
 
-<!-- オーバーレイ -->
+<!-- オーバーレイ（カード内クリックでは閉じない） -->
 <div class="overlay" id="overlay" onclick="closeOverlay(event)">
-  <div class="overlay-card" id="olCard"></div>
+  <div class="overlay-card" id="olCard" onclick="event.stopPropagation()"></div>
 </div>
 
 
@@ -974,6 +1030,7 @@ let isListening = false;
 let recognition = null;
 let synthesis = window.speechSynthesis;
 let showNumberGuide = true; // 数字ガイド表示（設定で消せる）
+let currentVoiceOverlay = null; // 入力オーバーレイ用：'event' | 'todo' | 'log' | null
 
 const textLevels = ['text-xs', 'text-sm', 'text-md', 'text-lg', 'text-xl'];
 
@@ -1008,7 +1065,7 @@ const VOICE_COMMANDS = {
 
 // ===== I18N =====
 const I18N = {
-  'cal': { h: 'きょうの よてい', k: '今日の予定' },
+  'cal': { h: 'さいきんの よてい', k: '最近の予定' },
   'todo': { h: 'やること', k: 'やること' },
   'log': { h: 'きょうの きろく', k: '今日の記録' },
   'gohome': { h: 'いえに かえる', k: '家に帰る' },
@@ -1151,15 +1208,18 @@ function openOverlay(type) {
       <div class="ol-icon">📝</div>
       <div class="ol-title">${kanaMode ? 'きょうの きろく' : '今日の記録'}</div>
       <div class="ol-body" style="text-align: left;">
-        <textarea id="logContent" placeholder="何をしましたか？&#10;例：散歩に行った、友達に会った、映画を見た" style="width: 100%; padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; min-height: 120px; resize: vertical; line-height: 1.6;"></textarea>
+        <textarea id="logContent" placeholder="何をしましたか？&#10;例：散歩に行った、友達に会った、映画を見た" style="width: 100%; padding: 14px; font-size: 1rem; border: 2px solid var(--border); border-radius: 10px; min-height: 120px; resize: vertical; line-height: 1.6; background: var(--bg-card); color: var(--text);"></textarea>
         <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
           <button onclick="addQuickLog('散歩した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🚶 散歩した</button>
           <button onclick="addQuickLog('食事した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🍽️ 食事した</button>
           <button onclick="addQuickLog('友達に会った')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">👥 友達に会った</button>
           <button onclick="addQuickLog('買い物した')" style="padding: 8px 16px; background: var(--green-soft); border: 2px solid var(--green); border-radius: 20px; font-size: 0.9rem; cursor: pointer;">🛒 買い物した</button>
         </div>
+        <div class="ol-voice-row" style="margin-top: 12px; display: flex; justify-content: center;">
+          <button type="button" class="voice-inline-btn" onclick="startVoiceForOverlay('log')" title="音声で入力">🎤 音声で入力</button>
+        </div>
         <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
-          💡 音声でも記録できます：「記録して：今日は公園に行きました」
+          💡 「記録して：今日は公園に行きました」と話しても記録できます
         </div>
       </div>
       <div class="ol-actions">
@@ -1372,13 +1432,35 @@ function openOverlay(type) {
       </div>
     `;
   } else if (type === 'calendar') {
-    // カレンダー + Google予定
+    // カレンダー + 最近の予定（ローカル）
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
-    
+    const todayStr = today.toISOString().split('T')[0];
+    const weekLater = new Date(today);
+    weekLater.setDate(weekLater.getDate() + 7);
+    const weekLaterStr = weekLater.toISOString().split('T')[0];
+    const recentForOverlay = localEvents
+      .filter(e => e.date >= todayStr && e.date <= weekLaterStr)
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+    let recentHTML = '';
+    if (recentForOverlay.length === 0) {
+      recentHTML = '<div style="font-size: 0.9rem; color: var(--text-quiet); padding: 8px 0;">予定はありません</div>';
+    } else {
+      let lastDate = '';
+      recentForOverlay.forEach(event => {
+        const dateLabel = formatScheduleDate(event.date);
+        if (event.date !== lastDate) {
+          lastDate = event.date;
+          recentHTML += `<div style="font-size: 0.75rem; font-weight: 700; color: var(--green); margin-top: 10px; margin-bottom: 4px;">${dateLabel}</div>`;
+        }
+        recentHTML += `<div style="padding: 8px 12px; background: var(--bg-soft); border-radius: 8px; margin-bottom: 6px; font-size: 0.9rem;"><span style="font-weight: 700;">${event.time}</span> ${event.title}</div>`;
+      });
+    }
+
     html = `
       <div class="ol-icon">📅</div>
       <div class="ol-title">${year}年${month + 1}月</div>
@@ -1395,14 +1477,8 @@ function openOverlay(type) {
           }).join('')}
         </div>
         <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">今日の予定</div>
-          <div style="padding: 12px; background: var(--bg-soft); border-radius: 8px; margin-bottom: 8px;">
-            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text);">14:00 デイサービス</div>
-            <div style="font-size: 0.75rem; color: var(--text-sub); margin-top: 4px;">お迎えが来ます</div>
-          </div>
-          <div style="padding: 12px; background: var(--bg-soft); border-radius: 8px;">
-            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text);">18:30 夜の服薬</div>
-          </div>
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">最近の予定</div>
+          ${recentHTML}
         </div>
       </div>
       <div class="ol-actions" style="flex-direction: column; width: 100%;">
@@ -1411,17 +1487,28 @@ function openOverlay(type) {
       </div>
     `;
   } else if (type === 'add-event') {
-    // 予定追加
+    // 予定追加（カレンダーから日付を渡された場合はその日で初期化）
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const prefillDate = (typeof arguments[1] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(arguments[1])) ? arguments[1] : todayStr;
+    const currentTime = today.toTimeString().split(' ')[0].substring(0, 5);
     html = `
       <div class="ol-icon">➕</div>
       <div class="ol-title">予定を追加</div>
       <div class="ol-body" style="text-align: left;">
-        <input type="text" id="eventTitle" placeholder="予定のタイトル" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
-        <input type="date" id="eventDate" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
-        <input type="time" id="eventTime" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
-        <textarea id="eventNote" placeholder="メモ（任意）" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; min-height: 80px; resize: vertical;"></textarea>
+        <input type="text" id="eventTitle" placeholder="予定のタイトル" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--bg-card); color: var(--text);" autofocus>
+        <label style="display: block; font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px;">日付</label>
+        <input type="date" id="eventDate" value="${prefillDate}" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 8px; background: var(--bg-card); color: var(--text);">
+        <input type="text" id="eventDateText" placeholder="または 2026-02-13 のように入力" style="width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--bg-card); color: var(--text);">
+        <label style="display: block; font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px;">時間</label>
+        <input type="time" id="eventTime" value="${currentTime}" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 8px; background: var(--bg-card); color: var(--text);">
+        <input type="text" id="eventTimeText" placeholder="または 14:00 のように入力" style="width: 100%; padding: 10px; font-size: 0.9rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--bg-card); color: var(--text);">
+        <textarea id="eventNote" placeholder="メモ（任意）" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; min-height: 80px; resize: vertical; background: var(--bg-card); color: var(--text);"></textarea>
+        <div class="ol-voice-row" style="margin-top: 12px; display: flex; justify-content: center;">
+          <button type="button" class="voice-inline-btn" onclick="startVoiceForOverlay('event')" title="音声で入力">🎤 音声で入力</button>
+        </div>
         <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
-          💡 音声でも追加できます：「予定を追加して：明日の午後2時に病院」
+          💡 「予定を追加して：明日の午後2時に病院」と話しても追加できます
         </div>
       </div>
       <div class="ol-actions">
@@ -1435,14 +1522,17 @@ function openOverlay(type) {
       <div class="ol-icon">📝</div>
       <div class="ol-title">Todoを追加</div>
       <div class="ol-body" style="text-align: left;">
-        <input type="text" id="todoTitle" placeholder="やること" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
-        <select id="todoPriority" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px;">
+        <input type="text" id="todoTitle" placeholder="やること" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--bg-card); color: var(--text);">
+        <select id="todoPriority" style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: var(--bg-card); color: var(--text);">
           <option value="low">急がない</option>
           <option value="medium" selected>普通</option>
           <option value="high">急ぐ</option>
         </select>
+        <div class="ol-voice-row" style="margin-top: 12px; display: flex; justify-content: center;">
+          <button type="button" class="voice-inline-btn" onclick="startVoiceForOverlay('todo')" title="音声で入力">🎤 音声で入力</button>
+        </div>
         <div style="margin-top: 12px; padding: 10px; background: var(--green-soft); border-radius: 8px; font-size: 0.8rem; color: var(--green); text-align: center;">
-          💡 音声でも追加できます：「Todoに追加して：牛乳を買う」
+          💡 「Todoに追加して：牛乳を買う」と話しても追加できます
         </div>
       </div>
       <div class="ol-actions">
@@ -1734,7 +1824,9 @@ function selectDate(day) {
   const dayEvents = localEvents.filter(e => e.date === dateStr);
   
   if (dayEvents.length === 0) {
-    alert(`${day}日の予定はありません`);
+    // 予定がない日は「予定を追加」を開き、その日付を入れた状態にする
+    closeOverlayDirect();
+    setTimeout(function() { openOverlay('add-event', dateStr); }, 300);
   } else {
     let message = `${day}日の予定：\n\n`;
     dayEvents.forEach(e => {
@@ -1752,12 +1844,24 @@ function addEvent() {
 
 function saveEvent() {
   const title = document.getElementById('eventTitle').value.trim();
-  const date = document.getElementById('eventDate').value;
-  const time = document.getElementById('eventTime').value;
-  const note = document.getElementById('eventNote').value.trim();
+  const dateEl = document.getElementById('eventDate');
+  const dateTextEl = document.getElementById('eventDateText');
+  const timeEl = document.getElementById('eventTime');
+  const timeTextEl = document.getElementById('eventTimeText');
+  const date = (dateEl && dateEl.value) || (dateTextEl && dateTextEl.value.trim()) || '';
+  const time = (timeEl && timeEl.value) || (timeTextEl && timeTextEl.value.trim()) || '';
+  const note = document.getElementById('eventNote') ? document.getElementById('eventNote').value.trim() : '';
   
   if (!title || !date || !time) {
     alert('タイトル、日付、時間を入力してください');
+    return;
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    alert('日付は 2026-02-13 の形式で入力してください');
+    return;
+  }
+  if (!/^\d{1,2}:\d{2}$/.test(time) && !/^\d{2}:\d{2}$/.test(time)) {
+    alert('時間は 14:00 の形式で入力してください');
     return;
   }
   
@@ -1882,7 +1986,8 @@ function updateLogView() {
     });
     html += '</div>';
   }
-  
+  html += '<div class="card-plus-row"><button type="button" class="card-plus-btn" onclick="openOverlay(\'log\')" title="記録を追加"><span class="plus-icon">➕</span> 記録を追加</button></div>';
+
   const logCard = document.getElementById('card3');
   if (logCard) {
     const body = logCard.querySelector('.card-body');
@@ -2051,19 +2156,34 @@ function importData(fileInput) {
 }
 
 function updateCalendarView() {
-  // カレンダーカードの予定を更新
-  const today = new Date().toISOString().split('T')[0];
-  const todayEvents = localEvents.filter(e => e.date === today).sort((a, b) => a.time.localeCompare(b.time));
-  
+  // スケジュールモード：最近の予定（今日〜7日後まで）を日付順で表示
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const weekLater = new Date(today);
+  weekLater.setDate(weekLater.getDate() + 7);
+  const weekLaterStr = weekLater.toISOString().split('T')[0];
+
+  const recentEvents = localEvents
+    .filter(e => e.date >= todayStr && e.date <= weekLaterStr)
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
   let html = '';
-  if (todayEvents.length === 0) {
-    html = '<div style="padding: 32px 22px; text-align: center; color: var(--text-quiet);">今日の予定はありません</div>';
+  if (recentEvents.length === 0) {
+    html = '<div style="padding: 24px 22px; text-align: center; color: var(--text-quiet);">';
+    html += '<div style="margin-bottom: 12px;">予定はありません</div>';
+    html += '</div>';
   } else {
-    html = '<div style="padding: 16px 22px;">';
-    todayEvents.forEach(event => {
+    html = '<div style="padding: 12px 22px;">';
+    let lastDate = '';
+    recentEvents.forEach(event => {
+      const dateLabel = formatScheduleDate(event.date);
+      if (event.date !== lastDate) {
+        lastDate = event.date;
+        html += `<div style="font-size: 0.8rem; font-weight: 700; color: var(--green); margin: 12px 0 6px 0; padding-bottom: 4px;">${dateLabel}</div>`;
+      }
       html += `
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: var(--bg-soft); border-radius: 8px;">
-          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">${event.time}</div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; padding: 10px; background: var(--bg-soft); border-radius: 8px;">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); min-width: 48px;">${event.time}</div>
           <div style="flex: 1;">
             <div style="font-size: 0.95rem; font-weight: 600; color: var(--text);">${event.title}</div>
             ${event.note ? `<div style="font-size: 0.8rem; color: var(--text-sub); margin-top: 2px;">${event.note}</div>` : ''}
@@ -2073,12 +2193,31 @@ function updateCalendarView() {
     });
     html += '</div>';
   }
-  
+  html += '<div class="card-plus-row"><button type="button" class="card-plus-btn" onclick="openOverlay(\'add-event\')" title="予定を追加"><span class="plus-icon">➕</span> 予定を追加</button></div>';
+
   const calCard = document.getElementById('card1');
   if (calCard) {
     const body = calCard.querySelector('.card-body');
     if (body) body.innerHTML = html;
   }
+}
+
+// スケジュール表示用の日付ラベル（今日 / 明日 / 2/15(金)）
+function formatScheduleDate(dateStr) {
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  if (dateStr === today) return '今日';
+  if (dateStr === tomorrowStr) return '明日';
+
+  const d = new Date(dateStr + 'T12:00:00');
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+  const month = d.getMonth() + 1;
+  const date = d.getDate();
+  const day = weekdays[d.getDay()];
+  return `${month}/${date}(${day})`;
 }
 
 function updateTodoView() {
@@ -2093,11 +2232,6 @@ function updateTodoView() {
   } else {
     html = '<div style="padding: 16px 22px;">';
     incompleteTodos.forEach(todo => {
-      const priorityColors = {
-        high: 'var(--rose)',
-        medium: 'var(--amber)',
-        low: 'var(--green)'
-      };
       const priorityLabels = {
         high: '🔴',
         medium: '🟡',
@@ -2113,7 +2247,8 @@ function updateTodoView() {
     });
     html += '</div>';
   }
-  
+  html += '<div class="card-plus-row"><button type="button" class="card-plus-btn" onclick="openOverlay(\'add-todo\')" title="やること追加"><span class="plus-icon">➕</span> やること追加</button></div>';
+
   const todoCard = document.getElementById('card2');
   if (todoCard) {
     const body = todoCard.querySelector('.card-body');
@@ -2142,7 +2277,26 @@ function initVoiceRecognition() {
 
   recognition.onresult = function(event) {
     const transcript = event.results[0][0].transcript;
-    document.getElementById('voiceText').textContent = '「' + transcript + '」';
+    const banner = document.getElementById('voiceText');
+    if (banner) banner.textContent = '「' + transcript + '」';
+    if (currentVoiceOverlay === 'event') {
+      const el = document.getElementById('eventTitle');
+      if (el) { el.value = transcript; el.focus(); }
+      currentVoiceOverlay = null;
+      return;
+    }
+    if (currentVoiceOverlay === 'todo') {
+      const el = document.getElementById('todoTitle');
+      if (el) { el.value = transcript; el.focus(); }
+      currentVoiceOverlay = null;
+      return;
+    }
+    if (currentVoiceOverlay === 'log') {
+      const el = document.getElementById('logContent');
+      if (el) { el.value = transcript; el.focus(); }
+      currentVoiceOverlay = null;
+      return;
+    }
     processVoiceCommand(transcript);
   };
 
@@ -2173,6 +2327,11 @@ function startVoice() {
     return;
   }
   recognition.start();
+}
+
+function startVoiceForOverlay(type) {
+  currentVoiceOverlay = type;
+  startVoice();
 }
 
 function stopVoice() {
