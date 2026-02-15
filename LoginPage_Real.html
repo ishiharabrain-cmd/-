@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>訪問看護連携システム</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 10px;
+    }
+    
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    /* ログイン画面 */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    
+    .header-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1976d2;
+    }
+    
+    .label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    
+    .label:first-of-type { margin-top: 0; }
+    
+    select, input, textarea {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+      line-height: 1.6;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+      padding: 12px;
+      font-size: 15px;
+    }
+    
+    .btn-small {
+      padding: 10px 16px;
+      font-size: 14px;
+      width: auto;
+      display: inline-block;
+    }
+    
+    .error {
+      margin-top: 12px;
+      padding: 12px;
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      border-radius: 8px;
+      color: #c62828;
+      font-weight: 600;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .hidden { display: none !important; }
+    
+    /* 患者リスト */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 12px;
+    }
+    
+    .tag-info {
+      font-weight: bold;
+      color: #1976d2;
+      font-size: 16px;
+    }
+    
+    .logout-btn {
+      color: #f44336;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: underline;
+    }
+    
+    .patient-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .patient-card:active {
+      transform: scale(0.98);
+    }
+    
+    .patient-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .patient-id {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 6px;
+    }
+    
+    .patient-info {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .patient-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-top: 6px;
+    }
+    
+    .patient-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    /* 患者詳細 */
+    .patient-detail-header {
+      text-align: center;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 16px;
+    }
+    
+    .patient-detail-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1976d2;
+    }
+    
+    .patient-detail-id {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    
+    .detail-section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1976d2;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 4px;
+    }
+    
+    .detail-row {
+      display: flex;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    
+    .detail-label {
+      width: 100px;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .detail-value {
+      flex: 1;
+      color: #333;
+      word-break: break-all;
+    }
+    
+    /* 報告画面 */
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #1976d2;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .scenario-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .scenario-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px 8px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .scenario-btn.active {
+      background: #e3f2fd;
+      border-color: #1976d2;
+      color: #1976d2;
+    }
+    
+    /* 画像アップロード */
+    .image-upload-area {
+      border: 2px dashed #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    
+    .image-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px;
+    }
+    
+    .image-preview {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    
+    .image-preview-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(244, 67, 54, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* 音声入力ボタン */
+    .voice-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .voice-btn.listening {
+      background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .success {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 12px;
+      border-radius: 8px;
+      color: #2e7d32;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    
+    /* ログインタブ */
+    .login-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .login-tab {
+      flex: 1;
+      padding: 12px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #666;
+    }
+    
+    .login-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+    
+    .login-form {
+      display: none;
+    }
+    
+    .login-form.active {
+      display: block;
+    }
+    
+    /* 文字サイズ制御 */
+    body.font-small { font-size: 90%; }
+    body.font-medium { font-size: 100%; }
+    body.font-large { font-size: 120%; }
+    
+    .font-size-control {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 12px;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .font-size-control button {
+      padding: 8px 16px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .font-size-control button.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    /* 記録者役割選択（縦並び） */
+    .role-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .role-option {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: #f5f5f5;
+      border: 3px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .role-option input[type="radio"] {
+      margin-right: 12px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+    
+    .role-option:has(input:checked) {
+      background: #e3f2fd;
+      border-color: #1976d2;
+      color: #1976d2;
+    }
+    
+    /* カメラモーダル */
+    .photo-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .photo-modal.active {
+      display: flex;
+    }
+    
+    .photo-modal video,
+    .photo-modal img {
+      max-width: 90%;
+      max-height: 60vh;
+      border-radius: 8px;
+    }
+    
+    .photo-controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .photo-controls button {
+      padding: 12px 24px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    /* 時間確認ダイアログ */
+    .time-dialog-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .time-dialog-overlay.active {
+      display: flex;
+    }
+    
+    .time-dialog {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .time-dialog h3 {
+      margin-bottom: 20px;
+      color: #1976d2;
+      text-align: center;
+    }
+    
+    .time-input-group {
+      margin-bottom: 16px;
+    }
+    
+    .time-input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #555;
+    }
+    
+    .time-input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .time-dialog-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .time-dialog-buttons button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .time-dialog-buttons .btn-confirm {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .time-dialog-buttons .btn-cancel {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    /* クイックメッセージ */
+    .quick-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #4caf50;
+      color: white;
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 10001;
+      animation: fadeInOut 2s ease-in-out;
+    }
+    
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- 1. ログイン画面 -->
+    <div id="loginScreen" class="card">
+      <div class="header">
+        <div class="header-icon">🏥</div>
+        <div class="header-title">訪問看護連携システム</div>
+      </div>
+      
+      <!-- ログインタブ -->
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="switchLoginTab('staff')">👥 スタッフ</button>
+        <button class="login-tab" onclick="switchLoginTab('patient')">👤 患者ID</button>
+      </div>
+      
+      <!-- スタッフログイン -->
+      <div id="staffLoginForm" class="login-form active">
+        <label class="label">① あなたのタグを入力</label>
+        <input type="text" id="tagInput" placeholder="例: 訪問看護A" autocomplete="off" onkeypress="if(event.key==='Enter'){document.getElementById('passwordInput').focus()}">
+        <div style="font-size: 12px; color: #999; margin-top: 4px;">
+          ※漢字・ひらがな・カタカナで正確に入力してください
+        </div>
+        
+        <label class="label">② タグのパスワード</label>
+        <input type="password" id="passwordInput" placeholder="パスワードを入力" onkeypress="if(event.key==='Enter'){handleStaffLogin()}">
+        
+        <button class="btn" id="loginBtn" onclick="handleStaffLogin()">🔓 ログイン</button>
+      </div>
+      
+      <!-- 患者ログイン -->
+      <div id="patientLoginForm" class="login-form">
+        <label class="label">① 患者番号（患者ID）</label>
+        <input type="text" id="patientIdInput" placeholder="例: 001" autocomplete="off" onkeypress="if(event.key==='Enter'){document.getElementById('birthdateInput').focus()}">
+        <div style="font-size: 12px; color: #999; margin-top: 4px;">
+          ※カルテに記載されている患者番号を入力
+        </div>
+        
+        <label class="label">② 認証コード（4桁）</label>
+        <input type="password" id="birthdateInput" placeholder="例: 1950" inputmode="numeric" maxlength="4" pattern="\d{4}" onkeypress="if(event.key==='Enter'){handlePatientLogin()}">
+        <div style="font-size: 12px; color: #999; margin-top: 4px;">
+          ※指定された認証コードを入力
+        </div>
+        
+        <button class="btn" id="patientLoginBtn" onclick="handlePatientLogin()">🔓 ログイン</button>
+      </div>
+      
+      <div id="errorBox" class="error"></div>
+    </div>
+    
+    <!-- 2. 患者リスト画面 -->
+    <div id="patientListScreen" class="hidden">
+      <div class="font-size-control">
+        <button onclick="changeFontSize('small')" id="fontBtnSmall">A⁻</button>
+        <button onclick="changeFontSize('medium')" id="fontBtnMedium" class="active">A</button>
+        <button onclick="changeFontSize('large')" id="fontBtnLarge">A⁺</button>
+      </div>
+      
+      <div class="top-bar">
+        <div class="tag-info" id="tagInfo">👤 タグ名</div>
+        <div class="logout-btn" onclick="handleLogout()">ログアウト</div>
+      </div>
+      
+      <div id="patientList"></div>
+    </div>
+    
+    <!-- 3. 患者詳細画面 -->
+    <div id="patientDetailScreen" class="hidden">
+      <div class="font-size-control">
+        <button onclick="changeFontSize('small')" id="fontBtnSmall2">A⁻</button>
+        <button onclick="changeFontSize('medium')" id="fontBtnMedium2" class="active">A</button>
+        <button onclick="changeFontSize('large')" id="fontBtnLarge2">A⁺</button>
+      </div>
+      
+      <div class="card">
+        <div class="patient-detail-header">
+          <div class="patient-detail-name" id="detailPatientName">患者名</div>
+          <div class="patient-detail-id" id="detailPatientId">ID: 0000</div>
+        </div>
+        
+        <div class="detail-section">
+          <div class="detail-section-title">📋 基本情報</div>
+          <div id="detailBasicInfo"></div>
+        </div>
+        
+        <div class="detail-section">
+          <div class="detail-section-title">🏥 医療情報</div>
+          <div id="detailMedicalInfo"></div>
+        </div>
+        
+        <div class="detail-section">
+          <div class="detail-section-title">📝 備考</div>
+          <div id="detailNotes"></div>
+        </div>
+        
+        <button class="btn" onclick="openReportFromDetail()">📝 報告する</button>
+        <button class="btn btn-secondary" id="backToListBtn" onclick="backToPatientList()">← 患者リストに戻る</button>
+      </div>
+    </div>
+    
+    <!-- 4. 報告入力画面 -->
+    <div id="reportScreen" class="hidden">
+      <div class="font-size-control">
+        <button onclick="changeFontSize('small')" id="fontBtnSmall3">A⁻</button>
+        <button onclick="changeFontSize('medium')" id="fontBtnMedium3" class="active">A</button>
+        <button onclick="changeFontSize('large')" id="fontBtnLarge3">A⁺</button>
+      </div>
+      
+      <div class="card">
+        <div class="patient-detail-header">
+          <div class="patient-detail-name" id="reportPatientName">患者名</div>
+          <div class="patient-detail-id" id="reportPatientInfo">ID: 0000</div>
+        </div>
+        
+        <!-- AI生成の経過サマリー -->
+        <div id="summaryContainer" style="background: #f0f7ff; border-left: 4px solid #2196F3; padding: 12px; border-radius: 4px; margin: 16px 0;">
+          <div style="font-size: 11px; color: #2196F3; font-weight: bold; margin-bottom: 5px;">
+            📋 クリニックで要約
+          </div>
+          <div style="font-size: 10px; color: #999; margin-bottom: 8px;">
+            間違っている場合はご連絡ください 
+            <button onclick="sendCorrectionEmail()" style="padding: 4px 8px; background: #2196f3; color: white; border: none; border-radius: 4px; font-size: 10px; cursor: pointer; margin-left: 4px;">
+              ✉️ ishihara.brain@gmail.com
+            </button>
+          </div>
+          <div id="patientSummaryDisplay" style="font-size: 14px; color: #444; line-height: 1.5; white-space: pre-wrap;">
+            読み込み中...
+          </div>
+        </div>
+        
+        <!-- 過去の記録サマリー -->
+        <div id="historySummary" style="display:none; margin: 16px 0; padding: 12px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2e7d32;">📚 過去の記録</div>
+          <div id="historyContent" style="font-size: 13px; line-height: 1.6;"></div>
+        </div>
+        
+        <div id="scenarioSection">
+          <div class="section-title">📝 シナリオ選択</div>
+          <div class="scenario-group">
+            <button class="scenario-btn" onclick="selectScenario(this, '発熱あり')">① 発熱</button>
+            <button class="scenario-btn" onclick="selectScenario(this, '転倒・怪我')">② 転倒</button>
+            <button class="scenario-btn" onclick="selectScenario(this, '特指示')">③ 特指示</button>
+            <button class="scenario-btn" onclick="selectScenario(this, 'その他')">④ その他</button>
+          </div>
+        </div>
+        
+        <!-- シナリオ別チェック項目 -->
+        <div id="scenarioChecklist" style="display:none; margin: 16px 0; padding: 12px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #e65100;">📋 確認項目</div>
+          <div id="checklistItems"></div>
+        </div>
+        
+        <!-- 特指示テンプレートフォーム -->
+        <div id="tokushijiTemplate" style="display:none; margin: 16px 0; padding: 16px; background: #fce4ec; border-radius: 10px; border-left: 4px solid #e91e63;">
+          <div style="font-weight: bold; margin-bottom: 12px; color: #c2185b; font-size: 15px;">🏥 特別指示書 依頼テンプレート</div>
+          <div style="font-size: 11px; color: #888; margin-bottom: 12px;">必要な項目だけ入力して「テキストに反映」を押してください。空欄の項目は省略されます。</div>
+          
+          <!-- 状況 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">状況</label>
+            <select id="tokuStatus" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px; margin-top:4px;">
+              <option value="訪問中">訪問中</option>
+              <option value="訪問後">訪問後</option>
+              <option value="電話連絡">電話連絡</option>
+            </select>
+          </div>
+          
+          <!-- 特指示の要件 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">特指示の要件</label>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+              <label style="padding:6px 12px; background:white; border:2px solid #ddd; border-radius:6px; cursor:pointer; font-size:13px;">
+                <input type="checkbox" id="tokuReasonJokuso" style="margin-right:4px;" onchange="toggleJokuso()"> 褥瘡
+              </label>
+              <label style="padding:6px 12px; background:white; border:2px solid #ddd; border-radius:6px; cursor:pointer; font-size:13px;">
+                <input type="checkbox" id="tokuReasonHatsunetsu" style="margin-right:4px;"> 発熱
+              </label>
+              <label style="padding:6px 12px; background:white; border:2px solid #ddd; border-radius:6px; cursor:pointer; font-size:13px;">
+                <input type="checkbox" id="tokuReasonDassui" style="margin-right:4px;"> 脱水
+              </label>
+              <input type="text" id="tokuReasonOther" placeholder="その他" style="padding:6px 10px; border:2px solid #ddd; border-radius:6px; font-size:13px; width:120px;">
+            </div>
+          </div>
+          
+          <!-- 褥瘡セクション -->
+          <div id="jokusoSection" style="display:none; margin: 12px 0; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #e91e63; font-size: 13px;">褥瘡情報</div>
+            
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: #555;">部位</label>
+              <input type="text" id="jokusoSite" placeholder="例: 仙骨部" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; box-sizing:border-box;">
+            </div>
+            
+            <div style="font-weight: bold; font-size: 12px; color: #555; margin-bottom: 4px;">DESIGN-R 評価</div>
+            <div style="margin-bottom: 6px;">
+              <label style="font-size: 12px; color: #555;">評価日</label>
+              <input type="text" id="designrDate" placeholder="例: 2/15" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; box-sizing:border-box;">
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom: 8px;">
+              <div>
+                <label style="font-size:11px; color:#555;">D(深さ)</label>
+                <select id="designD" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="d0">d0</option><option value="d1">d1</option><option value="d2">d2</option>
+                  <option value="D3">D3</option><option value="D4">D4</option><option value="D5">D5</option>
+                  <option value="DDTI">DDTI</option><option value="DU">DU</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">e(滲出液)</label>
+                <select id="designE" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">e0 (0)</option><option value="1">e1 (1)</option>
+                  <option value="3">e3 (3)</option><option value="6">E6 (6)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">s(大きさ)</label>
+                <select id="designS" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">s0 (0)</option><option value="3">s3 (3)</option><option value="6">s6 (6)</option>
+                  <option value="8">s8 (8)</option><option value="9">s9 (9)</option><option value="12">s12 (12)</option>
+                  <option value="15">S15 (15)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">i(炎症/感染)</label>
+                <select id="designI" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">i0 (0)</option><option value="1">i1 (1)</option>
+                  <option value="3">I3C (3)</option><option value="3">I3 (3)</option><option value="9">I9 (9)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">g(肉芽組織)</label>
+                <select id="designG" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">g0 (0)</option><option value="1">g1 (1)</option><option value="3">g3 (3)</option>
+                  <option value="4">G4 (4)</option><option value="5">G5 (5)</option><option value="6">G6 (6)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">n(壊死組織)</label>
+                <select id="designN" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">n0 (0)</option><option value="3">N3 (3)</option><option value="6">N6 (6)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">P(ポケット)</label>
+                <select id="designP" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;" onchange="calcDesignR()">
+                  <option value="0">p0 (0)</option><option value="6">P6 (6)</option><option value="9">P9 (9)</option>
+                  <option value="12">P12 (12)</option><option value="24">P24 (24)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div id="designrResult" style="padding:8px; background:#fff3e0; border-radius:6px; font-size:13px; font-weight:bold; color:#e65100;">
+              合計: 0点 | 判定: 真皮損傷以内
+            </div>
+            <div style="margin-top:4px;">
+              <a href="https://www.almediaweb.jp/pressureulcer/maruwakari/part3/04.html" target="_blank" style="font-size:10px; color:#2196f3;">参考: DESIGN-R 2020 点数の付け方</a>
+            </div>
+          </div>
+          
+          <!-- 外用薬 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">外用薬</label>
+            <div id="ointmentRows" style="margin-top:4px;">
+              <div style="display:flex; gap:4px; margin-bottom:4px;">
+                <input type="text" class="ointSite" placeholder="部位" style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                <input type="text" class="ointName" placeholder="薬剤名" style="flex:2; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+              </div>
+              <div style="display:flex; gap:4px; margin-bottom:4px;">
+                <input type="text" class="ointSite" placeholder="部位" style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                <input type="text" class="ointName" placeholder="薬剤名" style="flex:2; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 処置内容 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">処置内容</label>
+            <textarea id="tokuTreatment" placeholder="例: オムツ交換、褥瘡処置" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; min-height:40px; box-sizing:border-box; font-family:inherit;"></textarea>
+          </div>
+          
+          <!-- WOCナース -->
+          <div style="margin-bottom: 10px;">
+            <label style="padding:6px 0; cursor:pointer; font-size:13px;">
+              <input type="checkbox" id="tokuWoc" style="margin-right:6px;" onchange="document.getElementById('wocDetail').style.display=this.checked?'block':'none'"> WOCナースの介入あり
+            </label>
+            <div id="wocDetail" style="display:none; margin-top:4px;">
+              <input type="text" id="tokuWocDate" placeholder="例: 2月16日（月）15時頃" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; box-sizing:border-box;">
+            </div>
+          </div>
+          
+          <!-- 添付 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">添付</label>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+              <label style="padding:4px 8px; background:white; border:1px solid #ddd; border-radius:4px; cursor:pointer; font-size:12px;">
+                <input type="checkbox" id="tokuAttachPhoto" style="margin-right:4px;"> 褥瘡写真
+              </label>
+              <label style="padding:4px 8px; background:white; border:1px solid #ddd; border-radius:4px; cursor:pointer; font-size:12px;">
+                <input type="checkbox" id="tokuAttachDesignR" style="margin-right:4px;"> DESIGN-R評価
+              </label>
+              <label style="padding:4px 8px; background:white; border:1px solid #ddd; border-radius:4px; cursor:pointer; font-size:12px;">
+                <input type="checkbox" id="tokuAttachInout" style="margin-right:4px;"> inout表
+              </label>
+            </div>
+          </div>
+          
+          <!-- バイタルサイン -->
+          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">バイタルサイン（VS）</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px;">
+              <div>
+                <label style="font-size:11px; color:#555;">体温</label>
+                <div style="display:flex; align-items:center;">
+                  <input type="text" id="tokuBT" placeholder="36.0" style="flex:1; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <span style="margin-left:4px; font-size:12px;">℃</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">血圧</label>
+                <div style="display:flex; align-items:center;">
+                  <input type="text" id="tokuBPH" placeholder="120" style="width:50px; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <span style="margin:0 2px;">/</span>
+                  <input type="text" id="tokuBPL" placeholder="80" style="width:50px; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <span style="margin-left:2px; font-size:11px;">mmHg</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">脈拍</label>
+                <div style="display:flex; align-items:center;">
+                  <input type="text" id="tokuPulse" placeholder="78" style="flex:1; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <select id="tokuPulseType" style="margin-left:4px; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:11px;">
+                    <option value="整">整</option><option value="不整">不整</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">SpO2</label>
+                <div style="display:flex; align-items:center;">
+                  <input type="text" id="tokuSpO2" placeholder="98" style="flex:1; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <span style="margin-left:4px; font-size:12px;">%</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">呼吸回数</label>
+                <div style="display:flex; align-items:center;">
+                  <input type="text" id="tokuRR" placeholder="20" style="flex:1; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+                  <span style="margin-left:4px; font-size:12px;">回</span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#555;">最終排便</label>
+                <input type="text" id="tokuLastBM" placeholder="例: 2/14" style="width:100%; padding:5px; border:1px solid #ddd; border-radius:4px; font-size:13px; box-sizing:border-box;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 状態 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">状態（患者の発言・様子）</label>
+            <textarea id="tokuCondition" placeholder="例: 喉乾いた。ヤクルト下さい" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; min-height:40px; box-sizing:border-box; font-family:inherit;"></textarea>
+          </div>
+          
+          <!-- 行った対応 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">行った対応</label>
+            <textarea id="tokuAction" placeholder="例: オムツ交換、褥瘡処置" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; min-height:40px; box-sizing:border-box; font-family:inherit;"></textarea>
+          </div>
+          
+          <!-- 返電連絡先 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">返電連絡先電話番号</label>
+            <input type="tel" id="tokuPhone" placeholder="例: 070-4519-5641" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; box-sizing:border-box;">
+          </div>
+          
+          <!-- 明日の訪看介入 -->
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">明日の訪看介入</label>
+            <textarea id="tokuTomorrow" placeholder="例: 11時から歯科往診、15時頃からWOC往診" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; min-height:40px; box-sizing:border-box; font-family:inherit;"></textarea>
+          </div>
+          
+          <!-- 薬局へ -->
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 13px; font-weight: bold; color: #555;">薬局への連絡</label>
+            <textarea id="tokuPharmacy" placeholder="例: パーミロール残は沢山あり補充不要" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:13px; min-height:40px; box-sizing:border-box; font-family:inherit;"></textarea>
+          </div>
+          
+          <!-- テキストに反映ボタン -->
+          <button onclick="applyTokushijiTemplate()" style="width:100%; padding:14px; background:linear-gradient(135deg, #e91e63, #f06292); color:white; border:none; border-radius:10px; font-size:15px; font-weight:bold; cursor:pointer; box-shadow:0 2px 8px rgba(233,30,99,0.3);">
+            📋 テキストに反映（修正可能）
+          </button>
+        </div>
+        
+        <div class="section-title">👤 記録者名（必須）</div>
+        <input type="text" id="reporterName" placeholder="例: 山田太郎" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 16px;">
+        
+        <div class="section-title">👤 記録者の役割</div>
+        <div class="role-selection">
+          <label class="role-option">
+            <input type="radio" name="reporterRole" value="nurse" checked onchange="toggleReportMode()">
+            <span>👩‍⚕️ 看護師・スタッフ</span>
+          </label>
+          <label class="role-option">
+            <input type="radio" name="reporterRole" value="doctor" onchange="toggleReportMode()">
+            <span>👨‍⚕️ 医師</span>
+          </label>
+        </div>
+        
+        <div id="urgentAlertBox" style="margin: 16px 0; padding: 15px; background: #fff3f3; border: 2px solid #ffcdd2; border-radius: 10px;">
+          <label style="display: flex; align-items: center; cursor: pointer; color: #d32f2f; font-weight: bold;">
+            <input type="checkbox" id="urgentAlertCheckbox" style="margin-right: 10px; width: 22px; height: 22px;">
+            <span id="urgentAlertLabel">🚀 医師へ今すぐメール</span>
+          </label>
+          <div id="urgentAlertDescription" style="font-size: 11px; color: #666; margin-top: 5px; margin-left: 32px;">
+            ※チェックを入れると、AI要約を待たずにこの内容が直接医師のメールに届きます。緊急の場合は電話連絡もお願いします。
+          </div>
+        </div>
+        
+        <div class="section-title content-label">✏️ 報告内容</div>
+        <textarea id="reportInput" placeholder="ここに入力...&#10;&#10;例: BT37.8℃、SpO2 96%&#10;発熱あり食欲低下(1/2)&#10;水分摂取は可"></textarea>
+        
+        <button class="voice-btn" id="voiceBtn" onclick="startVoiceInput()">
+          <span id="voiceBtnIcon">🎤</span>
+          <span id="voiceBtnText">音声で入力（PC用）</span>
+        </button>
+        
+        <div style="margin: 8px 0; font-size: 11px; color: #666;">
+          📱 スマホの方はキーボードの🎤ボタンをご利用ください
+        </div>
+        
+        <div class="section-title" style="margin-top: 20px;">🎙️ 音声ファイルを添付</div>
+        <input type="file" id="audioInput" accept="audio/*" style="display:none" onchange="handleAudioSelect(this)">
+        <button class="image-btn" onclick="document.getElementById('audioInput').click()">
+          🎙️ 音声ファイルを選択
+        </button>
+        <div id="audioPreview" style="margin-top: 8px;"></div>
+        
+        <div class="section-title" style="margin-top: 20px;">📸 写真を追加</div>
+        <div class="image-upload-area">
+          <input type="file" id="galleryInput" accept="image/*" multiple style="display:none" onchange="handleImageSelect(this, 'gallery')">
+          
+          <button class="image-upload-btn" onclick="takePhoto()">
+            📷 カメラで撮影
+          </button>
+          <button class="image-upload-btn" onclick="document.getElementById('galleryInput').click()">
+            🖼️ ギャラリーから選択
+          </button>
+          
+          <div style="margin: 12px 0;">
+            <label style="display: inline-flex; align-items: center; font-size: 13px; color: #555; cursor: pointer;">
+              <input type="checkbox" id="ocrCheckbox" style="margin-right: 6px; width: 16px; height: 16px;">
+              📝 画像の文字を読み取る（処方箋・メモなど）
+            </label>
+          </div>
+          
+          <div class="image-preview" id="imagePreview"></div>
+        </div>
+        
+        <button class="btn" id="sendBtn" onclick="handleSendReport()">📤 送信</button>
+        
+        <div id="successMessage" class="success hidden">
+          <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">
+            ✅ 報告を受け取りました
+          </div>
+          <div style="font-size: 14px; color: #2e7d32;">
+            クリニックで確認いたします。
+          </div>
+          <div style="font-size: 11px; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
+            ⚠️ 緊急で医師の判断が必要な場合は、お電話もお願いします。
+          </div>
+          <button id="backFromSuccessBtn" onclick="backToPatientList()" style="margin-top: 12px; padding: 8px 16px; background: #fff; border: 1px solid #4caf50; border-radius: 6px; color: #4caf50; cursor: pointer; font-size: 14px;">
+            ← 患者リストに戻る
+          </button>
+        </div>
+        
+        <button class="btn btn-secondary" onclick="backToDetailFromReport()" style="margin-top: 16px;">
+          ← 患者詳細に戻る
+        </button>
+      </div>
+    </div>
+    
+  </div>
+  
+  <script>
+    var currentTag = "";
+    var currentPatient = null;
+    var selectedScenario = "";
+    var selectedImages = [];
+    var recognition = null;
+    var visitStartTime = null;
+    var stream = null;
+    var capturedImageData = null;
+    var timeConfirmCallback = null;
+    
+    window.onload = function() {
+      document.getElementById('tagInput').focus();
+      
+      // 保存された文字サイズを適用
+      var savedSize = localStorage.getItem('fontSize') || 'medium';
+      applyFontSize(savedSize);
+    };
+    
+    // ログインタブの切り替え
+    function switchLoginTab(type) {
+      // タブのアクティブ状態を切り替え
+      var tabs = document.querySelectorAll('.login-tab');
+      tabs.forEach(function(tab) {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // フォームの表示切り替え
+      document.getElementById('staffLoginForm').classList.remove('active');
+      document.getElementById('patientLoginForm').classList.remove('active');
+      
+      if (type === 'staff') {
+        document.getElementById('staffLoginForm').classList.add('active');
+        setTimeout(function() { document.getElementById('tagInput').focus(); }, 100);
+      } else {
+        document.getElementById('patientLoginForm').classList.add('active');
+        setTimeout(function() { document.getElementById('patientIdInput').focus(); }, 100);
+      }
+      
+      hideError();
+    }
+    
+    // 文字サイズ変更
+    function changeFontSize(size) {
+      applyFontSize(size);
+      localStorage.setItem('fontSize', size);
+    }
+    
+    function applyFontSize(size) {
+      document.body.className = document.body.className.replace(/font-(small|medium|large)/g, '');
+      document.body.classList.add('font-' + size);
+      
+      // すべてのボタンのactive状態を更新
+      document.querySelectorAll('.font-size-control button').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      
+      var btnIds = ['fontBtnSmall', 'fontBtnMedium', 'fontBtnLarge',
+                    'fontBtnSmall2', 'fontBtnMedium2', 'fontBtnLarge2',
+                    'fontBtnSmall3', 'fontBtnMedium3', 'fontBtnLarge3'];
+      
+      btnIds.forEach(function(id) {
+        var btn = document.getElementById(id);
+        if (btn && btn.onclick && btn.onclick.toString().includes("'" + size + "'")) {
+          btn.classList.add('active');
+        }
+      });
+    }
+    
+    // スタッフログイン
+    function handleStaffLogin() {
+      var tag = document.getElementById('tagInput').value.trim();
+      var password = document.getElementById('passwordInput').value;
+      
+      hideError();
+      
+      if (!tag) {
+        showError("タグを入力してください");
+        return;
+      }
+      if (!password) {
+        showError("パスワードを入力してください");
+        return;
+      }
+      
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = "🔍 認証中...";
+      
+      google.script.run
+        .withSuccessHandler(onStaffLoginSuccess)
+        .withFailureHandler(onLoginFailure)
+        .authenticateTag(tag, password);
+    }
+    
+    // 患者ログイン
+    function handlePatientLogin() {
+      var patientId = document.getElementById('patientIdInput').value.trim();
+      var birthdate = document.getElementById('birthdateInput').value.trim();
+      
+      hideError();
+      
+      if (!patientId) {
+        showError("患者番号を入力してください");
+        return;
+      }
+      if (!birthdate) {
+        showError("認証コードを入力してください");
+        return;
+      }
+      
+      // 4桁の数字チェック
+      if (!/^\d{4}$/.test(birthdate)) {
+        showError("認証コードは4桁の数字で入力してください（例: 1950）");
+        return;
+      }
+      
+      // 年として妥当かチェック（1900〜2100）
+      var year = parseInt(birthdate);
+      if (year < 1900 || year > 2100) {
+        showError("認証コードが正しくありません");
+        return;
+      }
+      
+      var btn = document.getElementById('patientLoginBtn');
+      btn.disabled = true;
+      btn.textContent = "🔍 認証中...";
+      
+      google.script.run
+        .withSuccessHandler(onPatientLoginSuccess)
+        .withFailureHandler(onLoginFailure)
+        .authenticatePatient(patientId, birthdate);
+    }
+    
+    // スタッフログイン成功
+    function onStaffLoginSuccess(res) {
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = false;
+      btn.textContent = "🔓 ログイン";
+      
+      if (res && res.success) {
+        currentTag = res.tag;
+        document.getElementById('tagInfo').textContent = '👤 ' + currentTag;
+        
+        showScreen('patientListScreen');
+        loadPatientList();
+      } else {
+        showError(res.msg || "認証に失敗しました");
+      }
+    }
+    
+    // 患者ログイン成功
+    function onPatientLoginSuccess(res) {
+      console.log("🔍 患者ログイン成功レスポンス:", res);
+      
+      var btn = document.getElementById('patientLoginBtn');
+      btn.disabled = false;
+      btn.textContent = "🔓 ログイン";
+      
+      if (res && res.success && res.patient) {
+        console.log("✅ 患者データ:", res.patient);
+        
+        currentTag = "患者本人";
+        currentPatient = {
+          id: res.patient.id,
+          name: res.patient.name,
+          birthdate: res.patient.birthdate || "",
+          address: res.patient.address || "",
+          phone: res.patient.phone || "",
+          doctor: res.patient.doctor || "",
+          pharmacy: res.patient.pharmacy || "",
+          careLevel: res.patient.careLevel || "",
+          note: res.patient.note || ""
+        };
+        
+        console.log("📋 currentPatient設定完了:", currentPatient);
+        
+        // 直接患者詳細画面へ
+        document.getElementById('tagInfo').textContent = '👤 患者本人';
+        
+        console.log("🚀 患者詳細画面へ遷移: ID=" + currentPatient.id);
+        
+        // ログイン画面を非表示
+        document.getElementById('loginScreen').classList.add('hidden');
+        
+        // 患者詳細画面へ直接遷移
+        showPatientDetail(currentPatient.id);
+      } else {
+        console.error("❌ 認証失敗またはデータ不足:", res);
+        showError(res.msg || "認証に失敗しました");
+      }
+    }
+    
+    function onLoginFailure(error) {
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = false;
+      btn.textContent = "🔓 ログイン";
+      showError("通信エラー: " + (error.message || error));
+    }
+    
+    function loadPatientList() {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.patients) {
+            var container = document.getElementById('patientList');
+            container.innerHTML = '';
+            
+            if (res.patients.length === 0) {
+              container.innerHTML = '<div class="card"><p style="text-align:center;color:#999;">このタグに患者が登録されていません</p></div>';
+              return;
+            }
+            
+            res.patients.forEach(function(p) {
+              var card = document.createElement('div');
+              card.className = 'patient-card';
+              card.onclick = function() { showPatientDetail(p.id); };
+              
+              var badges = '';
+              if (p.careLevel) badges += '<span class="patient-badge">' + p.careLevel + '</span>';
+              if (p.hokanSt) badges += '<span class="patient-badge">' + p.hokanSt + '</span>';
+              if (p.status) badges += '<span class="patient-badge">' + p.status + '</span>';
+              
+              card.innerHTML = 
+                '<div class="patient-name">' + p.name + '</div>' +
+                '<div class="patient-id">ID: ' + p.id + '</div>' +
+                '<div class="patient-info">' + 
+                (p.address || '') + '<br>' +
+                (p.kana || '') +
+                '</div>' +
+                badges +
+                '<div class="patient-actions">' +
+                '<button class="btn btn-small" onclick="event.stopPropagation(); openReportScreen(\'' + p.id + '\')">報告する</button>' +
+                '</div>';
+              container.appendChild(card);
+            });
+          }
+        })
+        .getPatientsByTag(currentTag);
+    }
+    
+    function showPatientDetail(patientId) {
+      // 開始時刻を記録
+      visitStartTime = new Date();
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          console.log("📋 getPatientDetail成功:", res);
+          if (res && res.success && res.patient) {
+            currentPatient = res.patient;
+            
+            document.getElementById('detailPatientName').textContent = res.patient.name;
+            document.getElementById('detailPatientId').textContent = 'ID: ' + res.patient.id;
+            
+            // 基本情報
+            var basicHtml = '';
+            if (res.patient.kana) basicHtml += makeDetailRow('カナ', res.patient.kana);
+            if (res.patient.dob) basicHtml += makeDetailRow('生年月日', res.patient.dob);
+            if (res.patient.gender) basicHtml += makeDetailRow('性別', res.patient.gender);
+            if (res.patient.address) basicHtml += makeDetailRow('住所', res.patient.address + (res.patient.addressNote ? ' ' + res.patient.addressNote : ''));
+            if (res.patient.tel) basicHtml += makeDetailRow('電話', res.patient.tel);
+            if (res.patient.email) basicHtml += makeDetailRow('メール', res.patient.email);
+            document.getElementById('detailBasicInfo').innerHTML = basicHtml || '<p style="color:#999;">情報なし</p>';
+            
+            // 医療情報
+            var medicalHtml = '';
+            if (res.patient.careLevel) medicalHtml += makeDetailRow('要介護度', res.patient.careLevel);
+            if (res.patient.doctor) medicalHtml += makeDetailRow('主治医', res.patient.doctor);
+            if (res.patient.careManager) medicalHtml += makeDetailRow('ケアマネ', res.patient.careManager);
+            if (res.patient.hokanSt) medicalHtml += makeDetailRow('訪看ST', res.patient.hokanSt);
+            if (res.patient.shijiType) medicalHtml += makeDetailRow('指示書', res.patient.shijiType);
+            if (res.patient.pharmacy) medicalHtml += makeDetailRow('薬局', res.patient.pharmacy);
+            if (res.patient.lastVisit) medicalHtml += makeDetailRow('最終診療', res.patient.lastVisit);
+            document.getElementById('detailMedicalInfo').innerHTML = medicalHtml || '<p style="color:#999;">情報なし</p>';
+            
+            // 備考
+            var notesHtml = '';
+            if (res.patient.note) notesHtml += '<div style="margin-bottom:10px;"><strong>患者備考:</strong><br>' + res.patient.note.replace(/\n/g, '<br>') + '</div>';
+            if (res.patient.note2) notesHtml += '<div><strong>患者備考２:</strong><br>' + res.patient.note2.replace(/\n/g, '<br>') + '</div>';
+            document.getElementById('detailNotes').innerHTML = notesHtml || '<p style="color:#999;">備考なし</p>';
+            
+            showScreen('patientDetailScreen');
+            
+            // ボタンのテキストを患者本人ログインの場合は変更
+            var backBtn = document.getElementById('backToListBtn');
+            if (currentTag === "患者本人") {
+              backBtn.textContent = "← ログアウト";
+            } else {
+              backBtn.textContent = "← 患者リストに戻る";
+            }
+            
+            // 過去の記録を取得
+            loadPatientHistory(patientId);
+          } else {
+            console.error("❌ 患者詳細取得失敗:", res);
+            alert("患者情報の取得に失敗しました: " + (res ? res.msg : "不明なエラー"));
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("❌ getPatientDetailエラー:", error);
+          alert("エラー: " + error.message);
+        })
+        .getPatientDetail(patientId, currentTag);
+    }
+    
+    // 過去の記録を取得して表示
+    var allHistoryRecords = []; // 全件保持
+    var historyDisplayCount = 5; // 初期表示件数
+    
+    function loadPatientHistory(patientId) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.history) {
+            allHistoryRecords = res.history;
+            historyDisplayCount = 5; // リセット
+            displayHistory(allHistoryRecords, historyDisplayCount);
+          }
+        })
+        .withFailureHandler(function(err) {
+          console.log('過去の記録取得エラー:', err);
+        })
+        .getPatientHistory(patientId);
+    }
+    
+    // さらに表示
+    function showMoreHistory() {
+      historyDisplayCount += 10;
+      displayHistory(allHistoryRecords, historyDisplayCount);
+    }
+    
+    // 過去の記録を表示（ページネーション対応）
+    function displayHistory(history, maxShow) {
+      var historyDiv = document.getElementById('historySummary');
+      var contentDiv = document.getElementById('historyContent');
+      
+      if (!history || history.length === 0) {
+        historyDiv.style.display = 'none';
+        return;
+      }
+      
+      var showCount = Math.min(maxShow || 5, history.length);
+      var html = '';
+      
+      // 件数表示
+      html += '<div style="font-size:12px; color:#666; margin-bottom:8px;">';
+      html += '全 ' + history.length + ' 件';
+      if (history.length > showCount) {
+        html += '（' + showCount + ' 件表示中）';
+      }
+      html += ' | 訪問日時の新しい順';
+      html += '</div>';
+      
+      for (var index = 0; index < showCount; index++) {
+        var record = history[index];
+        var recordId = 'record_' + index;
+        
+        // ドキュメントサマリーは緑、通常記録は青のボーダー
+        var borderColor = record.isDocSummary ? '#4caf50' : '#2196f3';
+        
+        html += '<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid ' + borderColor + ';">';
+        
+        // ヘッダー行
+        html += '<div style="font-weight: bold; color: #2e7d32; margin-bottom: 4px;">';
+        html += '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">';
+        html += '<span style="font-size:13px;">📅 ' + record.date;
+        if (record.scenario) html += ' | 🏷️ ' + record.scenario;
+        html += '</span>';
+        
+        // ボタングループ
+        html += '<div style="display:flex; gap:4px; flex-wrap:wrap;">';
+        html += '<button onclick="copyRecord(\'' + recordId + '\')" ';
+        html += 'style="padding:4px 8px; background:#2196f3; color:white; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">';
+        html += '📋コピー</button>';
+        
+        // 編集・追記・修正歴・再生成ボタン（reportIdがある場合のみ）
+        if (record.reportId) {
+          html += '<button onclick="editRecord(\'' + record.reportId + '\', \'' + recordId + '\')" ';
+          html += 'style="padding:4px 8px; background:#ff9800; color:white; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">';
+          html += '✏️編集</button>';
+          
+          html += '<button onclick="appendRecord(\'' + record.reportId + '\', \'' + recordId + '\')" ';
+          html += 'style="padding:4px 8px; background:#00bcd4; color:white; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">';
+          html += '📝追記</button>';
+          
+          html += '<button onclick="showEditHistory(\'' + record.reportId + '\')" ';
+          html += 'style="padding:4px 8px; background:#607d8b; color:white; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">';
+          html += '📜履歴</button>';
+          
+          html += '<button onclick="regenerateRecord(\'' + record.reportId + '\', \'' + recordId + '\')" ';
+          html += 'style="padding:4px 8px; background:#9c27b0; color:white; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">';
+          html += '🔄再生成</button>';
+        }
+        
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+        
+        // 修正済みバッジ
+        if (record.manualEdit) {
+          html += '<div style="margin: 4px 0; font-size:10px;">';
+          html += '<span style="background:#fff3e0; color:#e65100; padding:2px 6px; border-radius:3px; font-weight:bold;">✏️ 修正済み';
+          if (record.manualEditBy) html += ' (' + record.manualEditBy + ')';
+          if (record.manualEditDate) {
+            var editDateStr = record.manualEditDate;
+            if (editDateStr instanceof Date) {
+              editDateStr = editDateStr.toLocaleDateString('ja-JP');
+            }
+            html += ' ' + editDateStr;
+          }
+          html += '</span>';
+          html += '</div>';
+        }
+        
+        if (record.aiSummary || record.content) {
+          html += '<div style="color: #555; font-size: 12px; margin-top: 6px;">';
+          html += '<strong>【クリニックで要約】</strong>';
+          if (record.reporter) {
+            var cleanReporter = record.reporter.replace(/^患者本人_/, '');
+            html += ' | 訪問者: <strong>' + cleanReporter + '</strong>';
+          }
+          html += '<br>';
+          
+          // コピー対象のテキスト
+          html += '<span id="' + recordId + '">';
+          var displayText = record.aiSummary || record.content;
+          html += displayText.replace(/\n/g, '<br>');
+          html += '</span>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      
+      // 「さらに表示」ボタン
+      if (history.length > showCount) {
+        var remaining = history.length - showCount;
+        html += '<div style="text-align:center; margin-top:8px;">';
+        html += '<button onclick="showMoreHistory()" ';
+        html += 'style="padding:10px 24px; background:#4caf50; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold;">';
+        html += '📂 さらに表示（残り ' + remaining + ' 件）</button>';
+        html += '</div>';
+      }
+      
+      contentDiv.innerHTML = html;
+      historyDiv.style.display = 'block';
+    }
+    
+    function makeDetailRow(label, value) {
+      return '<div class="detail-row"><span class="detail-label">' + label + ':</span><span class="detail-value">' + value + '</span></div>';
+    }
+    
+    function openReportFromDetail() {
+      showScreen('reportScreen');
+      setupReportScreen();
+    }
+    
+    function openReportScreen(patientId) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.patient) {
+            currentPatient = res.patient;
+            showScreen('reportScreen');
+            setupReportScreen();
+          }
+        })
+        .getPatientDetail(patientId, currentTag);
+    }
+    
+    // 報告モード切り替え（看護師/医師）
+    function toggleReportMode() {
+      var isDoctorMode = document.querySelector('input[name="reporterRole"]:checked').value === 'doctor';
+      
+      // シナリオ選択の表示/非表示
+      var scenarioSection = document.getElementById('scenarioSection');
+      if (scenarioSection) {
+        scenarioSection.style.display = isDoctorMode ? 'none' : 'block';
+      }
+      
+      // 緊急通知ボックスのラベルと説明を切り替え
+      var urgentLabel = document.getElementById('urgentAlertLabel');
+      var urgentDescription = document.getElementById('urgentAlertDescription');
+      
+      if (isDoctorMode) {
+        urgentLabel.innerHTML = '📋 自分へリマインドメール送信';
+        urgentDescription.textContent = '※チェックを入れると、次回行うべきタスク（紹介状作成、処方変更など）をメールでリマインドします。';
+      } else {
+        urgentLabel.innerHTML = '🚀 医師へ今すぐメール';
+        urgentDescription.textContent = '※チェックを入れると、AI要約を待たずにこの内容が直接医師のメールに届きます。緊急の場合は電話連絡もお願いします。';
+      }
+      
+      // ラベルの切り替え
+      var contentLabel = document.querySelector('.content-label');
+      if (contentLabel) {
+        contentLabel.textContent = isDoctorMode ? '✏️ 診察内容（SOAP形式で自動整理されます）' : '✏️ 報告内容';
+      }
+      
+      // プレースホルダーの切り替え
+      var reportInput = document.getElementById('reportInput');
+      if (reportInput) {
+        if (isDoctorMode) {
+          reportInput.placeholder = "診察内容を入力...\n\n例: 患者は前回から食欲が戻ったと話す。体温36.8℃、血圧128/76、SpO2 98%。呼吸音清、浮腫なし。全体的に状態は安定している。現在の処方を継続し、2週間後に再診とする。";
+        } else {
+          reportInput.placeholder = "ここに入力...\n\n例: BT37.8℃、SpO2 96%\n発熱あり食欲低下(1/2)\n水分摂取は可";
+        }
+      }
+    }
+    
+    function setupReportScreen() {
+      document.getElementById('reportPatientName').textContent = currentPatient.name;
+      document.getElementById('reportPatientInfo').textContent = 'ID: ' + currentPatient.id + ' / ' + currentPatient.careLevel;
+      
+      // Summaryシートから柔軟にサマリーを取得
+      google.script.run
+        .withSuccessHandler(function(res) {
+          var summaryDisplay = document.getElementById('patientSummaryDisplay');
+          var summaryContainer = document.getElementById('summaryContainer');
+          
+          if (res && res.success) {
+            if (res.isEmpty) {
+              // ケース4: まだ何もない
+              summaryDisplay.innerHTML = '<span style="color:#999;">まだサマリーが生成されていません。<br>訪問記録が追加されると、ここに経過が表示されます。</span>';
+            } else if (res.summary) {
+              // ケース1,2,3: 何らかの情報がある
+              summaryDisplay.innerHTML = res.summary.replace(/\n/g, '<br>');
+              summaryDisplay.style.color = "#444";
+              
+              // 最近の経過のみの場合は、背景色を変えて視覚的に区別
+              if (res.recentOnly) {
+                summaryContainer.style.background = "#fff9e6";
+                summaryContainer.style.borderColor = "#ffc107";
+              } else {
+                summaryContainer.style.background = "#f0f7ff";
+                summaryContainer.style.borderColor = "#2196F3";
+              }
+            } else {
+              summaryDisplay.innerHTML = '<span style="color:#999;">サマリーの読み込みに問題がありました。</span>';
+            }
+          } else {
+            summaryDisplay.innerHTML = '<span style="color:#999;">サマリーの取得に失敗しました。</span>';
+          }
+        })
+        .withFailureHandler(function(err) {
+          console.error("サマリー取得エラー:", err);
+          document.getElementById('patientSummaryDisplay').innerHTML = 
+            '<span style="color:#999;">サマリーの取得に失敗しました。</span>';
+        })
+        .getSummaryForPatient(currentPatient.id);
+      
+      document.getElementById('reportInput').value = "";
+      
+      // 修正：患者本人ログインであっても、記録者名は自動入力せず空欄にする
+      // これにより、訪問したスタッフや家族が自分の名前を都度入力できるようにします
+      var reporterNameInput = document.getElementById('reporterName');
+      
+      reporterNameInput.value = ""; // 常に空欄にする
+      reporterNameInput.readOnly = false; // 常に編集可能にする
+      reporterNameInput.style.background = ""; // 背景色を通常に戻す
+      
+      // チェックボックスをクリア
+      document.getElementById('urgentAlertCheckbox').checked = false;
+      document.getElementById('ocrCheckbox').checked = false;
+      
+      // 看護師モードをデフォルトに設定
+      document.querySelector('input[name="reporterRole"][value="nurse"]').checked = true;
+      toggleReportMode(); // ラベルを初期化
+      
+      selectedImages = [];
+      selectedAudio = null;
+      selectedScenario = "";
+      document.querySelectorAll('.scenario-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      document.getElementById('imagePreview').innerHTML = '';
+      document.getElementById('audioPreview').innerHTML = '';
+      document.getElementById('successMessage').classList.add('hidden');
+      
+      // チェックリストと特指示テンプレートを非表示
+      document.getElementById('scenarioChecklist').style.display = 'none';
+      document.getElementById('tokushijiTemplate').style.display = 'none';
+      
+      // 特指示テンプレートのフォームをリセット
+      document.getElementById('tokuStatus').value = '訪問中';
+      document.getElementById('tokuReasonJokuso').checked = false;
+      document.getElementById('tokuReasonHatsunetsu').checked = false;
+      document.getElementById('tokuReasonDassui').checked = false;
+      document.getElementById('tokuReasonOther').value = '';
+      document.getElementById('jokusoSection').style.display = 'none';
+      document.getElementById('jokusoSite').value = '';
+      document.getElementById('designrDate').value = '';
+      document.getElementById('designD').value = 'd0';
+      document.getElementById('designE').value = '0';
+      document.getElementById('designS').value = '0';
+      document.getElementById('designI').value = '0';
+      document.getElementById('designG').value = '0';
+      document.getElementById('designN').value = '0';
+      document.getElementById('designP').value = '0';
+      document.getElementById('designrResult').textContent = '合計: 0点 | 判定: 真皮損傷以内';
+      document.getElementById('tokuTreatment').value = '';
+      document.getElementById('tokuWoc').checked = false;
+      document.getElementById('wocDetail').style.display = 'none';
+      document.getElementById('tokuWocDate').value = '';
+      document.getElementById('tokuAttachPhoto').checked = false;
+      document.getElementById('tokuAttachDesignR').checked = false;
+      document.getElementById('tokuAttachInout').checked = false;
+      document.getElementById('tokuBT').value = '';
+      document.getElementById('tokuBPH').value = '';
+      document.getElementById('tokuBPL').value = '';
+      document.getElementById('tokuPulse').value = '';
+      document.getElementById('tokuSpO2').value = '';
+      document.getElementById('tokuRR').value = '';
+      document.getElementById('tokuLastBM').value = '';
+      document.getElementById('tokuCondition').value = '';
+      document.getElementById('tokuAction').value = '';
+      document.getElementById('tokuPhone').value = '';
+      document.getElementById('tokuTomorrow').value = '';
+      document.getElementById('tokuPharmacy').value = '';
+      
+      // ボタンのテキストを調整
+      var backBtn = document.getElementById('backFromSuccessBtn');
+      if (currentTag === "患者本人") {
+        backBtn.textContent = "← ログアウト";
+      } else {
+        backBtn.textContent = "← 患者リストに戻る";
+      }
+      
+      // 過去の記録を取得して表示
+      if (currentPatient && currentPatient.id) {
+        loadPatientHistory(currentPatient.id);
+      }
+    }
+    
+    function backToPatientList() {
+      // 患者本人ログインの場合はログイン画面に戻る
+      if (currentTag === "患者本人") {
+        handleLogout();
+      } else {
+        showScreen('patientListScreen');
+      }
+    }
+    
+    function backToDetailFromReport() {
+      showScreen('patientDetailScreen');
+    }
+    
+    function handleLogout() {
+      currentTag = "";
+      currentPatient = null;
+      showScreen('loginScreen');
+      document.getElementById('passwordInput').value = "";
+      document.getElementById('patientIdInput').value = "";
+      document.getElementById('birthdateInput').value = "";
+    }
+    
+    function showScreen(screenId) {
+      ['loginScreen', 'patientListScreen', 'patientDetailScreen', 'reportScreen'].forEach(function(id) {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+    
+    // シナリオごとのチェック項目定義
+    var scenarioChecklists = {
+      '発熱あり': [
+        '体温を測定（BT）',
+        '酸素飽和度（SpO2）',
+        '呼吸状態・咳の有無',
+        '食事・水分摂取量',
+        '尿量・排便状況',
+        '意識レベル（いつもと変わりないか）'
+      ],
+      '転倒・怪我': [
+        '受傷部位・範囲',
+        '出血の有無',
+        '腫脹・変形の有無',
+        '疼痛の程度',
+        '患部の可動域',
+        '転倒時の状況（いつ、どこで、何をしていた時か）'
+      ],
+      '特指示': [], // テンプレートフォームで対応
+      'その他': []
+    };
+
+    function selectScenario(btn, scenario) {
+      document.querySelectorAll('.scenario-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      selectedScenario = scenario;
+      
+      // 特指示テンプレートの表示/非表示
+      var tokushijiDiv = document.getElementById('tokushijiTemplate');
+      if (scenario === '特指示') {
+        tokushijiDiv.style.display = 'block';
+        // 自動入力を設定
+        setupTokushijiAutoFill();
+      } else {
+        tokushijiDiv.style.display = 'none';
+      }
+      
+      // チェックリストを表示
+      showChecklist(scenario);
+    }
+    
+    // 特指示テンプレートの自動入力を設定
+    function setupTokushijiAutoFill() {
+      // 本日の日付（例: 2/15（日））
+      var now = new Date();
+      var dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+      var dateStr = (now.getMonth() + 1) + '/' + now.getDate() + '（' + dayNames[now.getDay()] + '）';
+      
+      // DESIGN-R評価日にも本日日付を設定
+      var designrDate = document.getElementById('designrDate');
+      if (designrDate && !designrDate.value) {
+        designrDate.value = dateStr;
+      }
+    }
+    
+    // 褥瘡セクションの表示/非表示
+    function toggleJokuso() {
+      var checked = document.getElementById('tokuReasonJokuso').checked;
+      document.getElementById('jokusoSection').style.display = checked ? 'block' : 'none';
+    }
+    
+    // DESIGN-R 自動計算
+    function calcDesignR() {
+      var e = parseInt(document.getElementById('designE').value) || 0;
+      var s = parseInt(document.getElementById('designS').value) || 0;
+      var i = parseInt(document.getElementById('designI').value) || 0;
+      var g = parseInt(document.getElementById('designG').value) || 0;
+      var n = parseInt(document.getElementById('designN').value) || 0;
+      var p = parseInt(document.getElementById('designP').value) || 0;
+      
+      var total = e + s + i + g + n + p;
+      
+      var dVal = document.getElementById('designD').value;
+      var beyondDermis = (dVal === 'D3' || dVal === 'D4' || dVal === 'D5');
+      var judgment = beyondDermis ? '真皮を超える損傷' : '真皮損傷以内';
+      
+      var resultDiv = document.getElementById('designrResult');
+      resultDiv.textContent = '合計: ' + total + '点 | 判定: ' + judgment;
+      resultDiv.style.background = beyondDermis ? '#ffebee' : '#fff3e0';
+      resultDiv.style.color = beyondDermis ? '#c62828' : '#e65100';
+    }
+    
+    // DESIGN-R 表記を生成（例: DU-e3s3i0g1n0P0）
+    function getDesignRNotation() {
+      var d = document.getElementById('designD').value;
+      
+      var eVal = document.getElementById('designE').value;
+      var eLabels = {'0':'e0','1':'e1','3':'e3','6':'E6'};
+      
+      var sVal = document.getElementById('designS').value;
+      var sLabels = {'0':'s0','3':'s3','6':'s6','8':'s8','9':'s9','12':'s12','15':'S15'};
+      
+      var iSelect = document.getElementById('designI');
+      var iLabel = iSelect.options[iSelect.selectedIndex].text.split(' ')[0];
+      
+      var gVal = document.getElementById('designG').value;
+      var gLabels = {'0':'g0','1':'g1','3':'g3','4':'G4','5':'G5','6':'G6'};
+      
+      var nVal = document.getElementById('designN').value;
+      var nLabels = {'0':'n0','3':'N3','6':'N6'};
+      
+      var pVal = document.getElementById('designP').value;
+      var pLabels = {'0':'p0','6':'P6','9':'P9','12':'P12','24':'P24'};
+      
+      return d + '-' + (eLabels[eVal]||'e0') + (sLabels[sVal]||'s0') + iLabel + (gLabels[gVal]||'g0') + (nLabels[nVal]||'n0') + (pLabels[pVal]||'p0');
+    }
+    
+    // 特指示テンプレートをテキストに反映
+    function applyTokushijiTemplate() {
+      var now = new Date();
+      var dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+      var dateStr = (now.getMonth() + 1) + '/' + now.getDate() + '（' + dayNames[now.getDay()] + '）';
+      
+      var patientName = currentPatient ? currentPatient.name : '';
+      var reporterName = document.getElementById('reporterName').value.trim();
+      var status = document.getElementById('tokuStatus').value;
+      
+      // 要件を収集
+      var reasons = [];
+      if (document.getElementById('tokuReasonJokuso').checked) reasons.push('褥瘡');
+      if (document.getElementById('tokuReasonHatsunetsu').checked) reasons.push('発熱');
+      if (document.getElementById('tokuReasonDassui').checked) reasons.push('脱水');
+      var otherReason = document.getElementById('tokuReasonOther').value.trim();
+      if (otherReason) reasons.push(otherReason);
+      
+      var text = '';
+      
+      // ヘッダー
+      text += '【' + dateStr + ' ' + patientName + ' 様】\n';
+      text += '用件：特指示対応について、Dr指示待ち\n';
+      text += '状況：' + status + '\n';
+      text += 'だれからの相談か：' + currentTag + ' ' + (reporterName || '') + '\n';
+      if (reasons.length > 0) {
+        text += '状況：' + reasons.join('、') + 'の継続について\n';
+        text += '特指示の継続指示を頂きたい\n';
+      }
+      text += '\n';
+      
+      // 特指示の要件
+      if (reasons.length > 0) {
+        text += '特指示の要件【' + reasons.join('、') + '】\n';
+      }
+      
+      // 褥瘡セクション
+      if (document.getElementById('tokuReasonJokuso').checked) {
+        var site = document.getElementById('jokusoSite').value.trim();
+        var designDate = document.getElementById('designrDate').value.trim();
+        
+        if (site) {
+          text += '【' + site + 'の褥瘡】\n';
+        }
+        
+        var notation = getDesignRNotation();
+        var e = parseInt(document.getElementById('designE').value) || 0;
+        var s = parseInt(document.getElementById('designS').value) || 0;
+        var i = parseInt(document.getElementById('designI').value) || 0;
+        var g = parseInt(document.getElementById('designG').value) || 0;
+        var n = parseInt(document.getElementById('designN').value) || 0;
+        var p = parseInt(document.getElementById('designP').value) || 0;
+        var total = e + s + i + g + n + p;
+        var dVal = document.getElementById('designD').value;
+        var beyondDermis = (dVal === 'D3' || dVal === 'D4' || dVal === 'D5');
+        
+        text += 'DESIGN-R評価 ' + (designDate || '') + '（' + notation + '）\n';
+        text += '（合計' + total + '点 ' + (beyondDermis ? '真皮を超える損傷' : '真皮損傷以内') + '）\n\n';
+      }
+      
+      // 外用薬
+      var ointSites = document.querySelectorAll('.ointSite');
+      var ointNames = document.querySelectorAll('.ointName');
+      var hasOintment = false;
+      var ointText = '';
+      for (var idx = 0; idx < ointSites.length; idx++) {
+        var oSite = ointSites[idx].value.trim();
+        var oName = ointNames[idx].value.trim();
+        if (oSite || oName) {
+          if (!hasOintment) {
+            ointText += '【外用薬】\n';
+            hasOintment = true;
+          }
+          ointText += (oSite || '部位未入力') + '： ' + (oName || '') + '\n';
+        }
+      }
+      if (hasOintment) text += ointText;
+      
+      // 処置内容
+      var treatment = document.getElementById('tokuTreatment').value.trim();
+      if (treatment) {
+        text += '【処置内容】 ' + treatment + '\n';
+      }
+      
+      text += '\n';
+      
+      // WOCナース
+      if (document.getElementById('tokuWoc').checked) {
+        var wocDate = document.getElementById('tokuWocDate').value.trim();
+        text += '次回WOC介入は' + (wocDate || '日時未定') + '\n\n';
+      }
+      
+      // 添付
+      var attachments = [];
+      if (document.getElementById('tokuAttachPhoto').checked) attachments.push('褥瘡写真');
+      if (document.getElementById('tokuAttachDesignR').checked) attachments.push('DESIGN-R評価');
+      if (document.getElementById('tokuAttachInout').checked) attachments.push('inout表');
+      if (attachments.length > 0) {
+        text += '【添付】' + attachments.join('、') + '\n\n';
+      }
+      
+      // バイタルサイン
+      var bt = document.getElementById('tokuBT').value.trim();
+      var bpH = document.getElementById('tokuBPH').value.trim();
+      var bpL = document.getElementById('tokuBPL').value.trim();
+      var pulse = document.getElementById('tokuPulse').value.trim();
+      var pulseType = document.getElementById('tokuPulseType').value;
+      var spo2 = document.getElementById('tokuSpO2').value.trim();
+      var rr = document.getElementById('tokuRR').value.trim();
+      var lastBM = document.getElementById('tokuLastBM').value.trim();
+      
+      if (bt || bpH || pulse || spo2 || rr) {
+        text += '【VS：' + dateStr + '】\n';
+        if (bt) text += '体温：' + bt + '℃\n';
+        if (bpH && bpL) text += '血圧：' + bpH + '/' + bpL + 'mmHg\n';
+        if (pulse) text += '脈拍：' + pulse + '（' + pulseType + '）\n';
+        if (spo2) text += 'SpO2：' + spo2 + '%\n';
+        if (rr) text += '呼吸回数：' + rr + '回\n';
+        if (lastBM) text += '最終排便：' + lastBM + '\n';
+        text += '\n';
+      }
+      
+      // 状態
+      var condition = document.getElementById('tokuCondition').value.trim();
+      if (condition) {
+        text += '【状態】\n' + condition + '\n\n';
+      }
+      
+      // 行った対応
+      var action = document.getElementById('tokuAction').value.trim();
+      if (action) {
+        text += '行った対応：' + action + '\n';
+      }
+      
+      // 返電連絡先
+      var phone = document.getElementById('tokuPhone').value.trim();
+      if (phone) {
+        text += '返電連絡先電話番号：' + phone + '\n';
+      }
+      
+      text += '\n';
+      
+      // 明日の訪看介入
+      var tomorrow = document.getElementById('tokuTomorrow').value.trim();
+      if (tomorrow) {
+        text += '【明日の訪看介入】\n' + tomorrow + '\n\n';
+      }
+      
+      // 薬局へ
+      var pharmacy = document.getElementById('tokuPharmacy').value.trim();
+      if (pharmacy) {
+        text += '【薬局へ】\n' + pharmacy + '\n';
+      }
+      
+      // 記録者
+      if (reporterName) {
+        text += '\n記録者：' + reporterName;
+      }
+      
+      // テキストエリアに反映
+      var textarea = document.getElementById('reportInput');
+      var existing = textarea.value.trim();
+      if (existing) {
+        // 既存テキストがある場合は上書き確認
+        if (!confirm('報告内容を上書きしますか？\n（キャンセルで末尾に追記）')) {
+          textarea.value = existing + '\n\n' + text;
+        } else {
+          textarea.value = text;
+        }
+      } else {
+        textarea.value = text;
+      }
+      
+      // テキストエリアにスクロール
+      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      textarea.focus();
+      
+      showQuickMessage('📋 テキストに反映しました（修正できます）');
+    }
+    
+    function showChecklist(scenario) {
+      var checklistDiv = document.getElementById('scenarioChecklist');
+      var itemsDiv = document.getElementById('checklistItems');
+      var items = scenarioChecklists[scenario] || [];
+      
+      if (items.length === 0) {
+        checklistDiv.style.display = 'none';
+        return;
+      }
+      
+      var html = '';
+      items.forEach(function(item, index) {
+        html += '<div style="margin: 6px 0; padding: 6px; background: white; border-radius: 4px;">';
+        html += '<label style="display: flex; align-items: center; cursor: pointer;">';
+        html += '<input type="checkbox" style="margin-right: 8px; width: 18px; height: 18px;">';
+        html += '<span style="flex: 1;">' + (index + 1) + '. ' + item + '</span>';
+        html += '</label>';
+        html += '</div>';
+      });
+      
+      itemsDiv.innerHTML = html;
+      checklistDiv.style.display = 'block';
+    }
+    
+    function handleImageSelect(input, source) {
+      var files = input.files;
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var reader = new FileReader();
+        reader.onload = (function(f) {
+          return function(e) {
+            selectedImages.push(e.target.result);
+            updateImagePreview();
+          };
+        })(file);
+        reader.readAsDataURL(file);
+      }
+      input.value = "";
+    }
+    
+    function updateImagePreview() {
+      var preview = document.getElementById('imagePreview');
+      preview.innerHTML = '';
+      
+      selectedImages.forEach(function(imgData, index) {
+        var item = document.createElement('div');
+        item.className = 'image-preview-item';
+        item.innerHTML = 
+          '<img src="' + imgData + '">' +
+          '<button class="image-remove" onclick="removeImage(' + index + ')">×</button>';
+        preview.appendChild(item);
+      });
+    }
+    
+    function removeImage(index) {
+      selectedImages.splice(index, 1);
+      updateImagePreview();
+    }
+    
+    var isRecording = false;
+    var lastProcessedIndex = 0; // 最後に処理した結果のインデックス
+    
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('お使いのブラウザは音声入力に対応していません。Chromeをご利用ください。');
+        return;
+      }
+      
+      if (isRecording) {
+        // 停止
+        recognition.stop();
+        isRecording = false;
+        lastProcessedIndex = 0; // リセット
+        document.getElementById('voiceBtn').classList.remove('listening');
+        document.getElementById('voiceBtnIcon').textContent = '🎤';
+        document.getElementById('voiceBtnText').textContent = '音声で入力（PC用）';
+        return;
+      }
+      
+      if (!recognition) {
+        recognition = new webkitSpeechRecognition();
+        recognition.lang = 'ja-JP';
+        recognition.continuous = true;  // 連続録音を有効化
+        recognition.interimResults = false;  // 途中結果は表示しない（重複防止）
+        
+        recognition.onresult = function(event) {
+          var textarea = document.getElementById('reportInput');
+          var finalTranscript = '';
+          
+          // 最後に処理したインデックスから処理（重複防止）
+          for (var i = lastProcessedIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              var text = event.results[i][0].transcript;
+              finalTranscript += text;
+              lastProcessedIndex = i + 1; // 次回はここから処理
+              console.log('[音声認識] 追加: ' + text);
+            }
+          }
+          
+          if (finalTranscript) {
+            // 空白または改行で区切って追加
+            if (textarea.value && !textarea.value.endsWith(' ') && !textarea.value.endsWith('\n')) {
+              textarea.value += ' ';
+            }
+            textarea.value += finalTranscript;
+          }
+        };
+        
+        recognition.onerror = function(event) {
+          console.error('[音声認識エラー]', event.error);
+          isRecording = false;
+          lastProcessedIndex = 0;
+          document.getElementById('voiceBtn').classList.remove('listening');
+          document.getElementById('voiceBtnIcon').textContent = '🎤';
+          document.getElementById('voiceBtnText').textContent = '音声で入力（PC用）';
+          if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            alert('音声認識エラー: ' + event.error + '\n\nスマホの方はキーボードの🎤ボタンをご利用ください。');
+          }
+        };
+        
+        recognition.onend = function() {
+          console.log('[音声認識] 終了イベント、isRecording=' + isRecording);
+          if (isRecording) {
+            // 自動的に再開（連続録音）
+            try {
+              // lastProcessedIndexはリセットしない（連続で追加するため）
+              recognition.start();
+              console.log('[音声認識] 再開しました');
+            } catch (e) {
+              console.error('[音声認識] 再開エラー:', e);
+              isRecording = false;
+              lastProcessedIndex = 0;
+              document.getElementById('voiceBtn').classList.remove('listening');
+              document.getElementById('voiceBtnIcon').textContent = '🎤';
+              document.getElementById('voiceBtnText').textContent = '音声で入力（PC用）';
+            }
+          } else {
+            lastProcessedIndex = 0; // 停止時はリセット
+          }
+        };
+      }
+      
+      isRecording = true;
+      document.getElementById('voiceBtn').classList.add('listening');
+      document.getElementById('voiceBtnIcon').textContent = '⏹️';
+      document.getElementById('voiceBtnText').textContent = '停止';
+      recognition.start();
+    }
+    
+    // 音声ファイル選択処理
+    var selectedAudio = null;
+    
+    function handleAudioSelect(input) {
+      if (input.files && input.files[0]) {
+        selectedAudio = input.files[0];
+        var audioPreview = document.getElementById('audioPreview');
+        
+        // ファイルサイズの表示
+        var fileSize = (selectedAudio.size / 1024 / 1024).toFixed(2);
+        audioPreview.innerHTML = '<div style="padding:8px; background:#e3f2fd; border-radius:4px; color:#1976d2;">🎙️ ' + selectedAudio.name + ' (' + fileSize + 'MB)<br><small>📝 送信時に自動的に文字起こしされます</small></div>';
+        
+        // ファイルサイズが大きすぎる場合は警告
+        if (selectedAudio.size > 10 * 1024 * 1024) { // 10MB以上
+          audioPreview.innerHTML += '<div style="padding:8px; background:#fff3cd; border-radius:4px; color:#856404; margin-top:4px; font-size:12px;">⚠️ ファイルサイズが大きいため、処理に時間がかかる場合があります</div>';
+        }
+      }
+    }
+    
+    // カメラ撮影機能
+    async function takePhoto() {
+      var modal = document.getElementById('photoModal');
+      var video = document.getElementById('photoVideo');
+      
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' },
+          audio: false
+        });
+        video.srcObject = stream;
+        modal.classList.add('active');
+        
+        document.getElementById('captureBtn').style.display = 'block';
+        document.getElementById('confirmPhotoBtn').style.display = 'none';
+        document.getElementById('photoPreview').style.display = 'none';
+        video.style.display = 'block';
+      } catch (err) {
+        alert('カメラにアクセスできません。設定を確認してください。\n\nエラー: ' + err.message);
+      }
+    }
+    
+    function capturePhoto() {
+      var video = document.getElementById('photoVideo');
+      var canvas = document.getElementById('photoCanvas');
+      var preview = document.getElementById('photoPreview');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      
+      capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
+      preview.src = capturedImageData;
+      
+      video.style.display = 'none';
+      preview.style.display = 'block';
+      document.getElementById('captureBtn').style.display = 'none';
+      document.getElementById('confirmPhotoBtn').style.display = 'block';
+    }
+    
+    function confirmPhoto() {
+      if (capturedImageData) {
+        selectedImages.push(capturedImageData);
+        updateImagePreview();
+      }
+      closePhotoModal();
+    }
+    
+    function closePhotoModal() {
+      var modal = document.getElementById('photoModal');
+      modal.classList.remove('active');
+      
+      if (stream) {
+        stream.getTracks().forEach(function(track) {
+          track.stop();
+        });
+        stream = null;
+      }
+      
+      capturedImageData = null;
+      document.getElementById('photoVideo').style.display = 'none';
+      document.getElementById('photoPreview').style.display = 'none';
+    }
+    
+    // 時間確認ダイアログ
+    function showTimeConfirmDialog(callback) {
+      var dialog = document.getElementById('timeDialog');
+      var startInput = document.getElementById('dialogStartTime');
+      var endInput = document.getElementById('dialogEndTime');
+      
+      var now = new Date();
+      var start = visitStartTime || now;
+      
+      startInput.value = toDateTimeLocal(start);
+      endInput.value = toDateTimeLocal(now);
+      
+      timeConfirmCallback = callback;
+      dialog.classList.add('active');
+    }
+    
+    function confirmTime() {
+      var startInput = document.getElementById('dialogStartTime');
+      var endInput = document.getElementById('dialogEndTime');
+      
+      var startTime = startInput.value;
+      var endTime = endInput.value;
+      
+      document.getElementById('timeDialog').classList.remove('active');
+      
+      if (timeConfirmCallback) {
+        timeConfirmCallback(startTime, endTime);
+      }
+    }
+    
+    function cancelTime() {
+      document.getElementById('timeDialog').classList.remove('active');
+      
+      var btn = document.getElementById('sendBtn');
+      btn.disabled = false;
+      btn.textContent = "📤 送信";
+    }
+    
+    function toDateTimeLocal(date) {
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, '0');
+      var day = String(date.getDate()).padStart(2, '0');
+      var hours = String(date.getHours()).padStart(2, '0');
+      var minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    }
+    
+    // 記録をコピー
+    function copyRecord(recordId) {
+      var element = document.getElementById(recordId);
+      if (!element) {
+        alert('記録が見つかりません');
+        return;
+      }
+      
+      // HTMLから改行を保持してテキストに変換
+      var html = element.innerHTML;
+      var text = html
+        .replace(/<br\s*\/?>/gi, '\n')  // <br>を改行に変換
+        .replace(/<[^>]+>/g, '')         // その他のHTMLタグを削除
+        .replace(/&nbsp;/g, ' ')         // &nbsp;をスペースに
+        .replace(/&lt;/g, '<')           // エスケープ文字を戻す
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .trim();
+      
+      // 患者名を追加
+      var patientName = currentPatient ? currentPatient.name : '患者名不明';
+      var textWithPatient = '患者名: ' + patientName + '\n\n' + text;
+      
+      navigator.clipboard.writeText(textWithPatient).then(function() {
+        var btn = event.target;
+        var originalText = btn.textContent;
+        btn.textContent = '✓ コピー完了';
+        btn.style.background = '#4caf50';
+        
+        setTimeout(function() {
+          btn.textContent = originalText;
+          btn.style.background = '#2196f3';
+        }, 2000);
+      }).catch(function(err) {
+        alert('コピーに失敗しました: ' + err);
+      });
+    }
+    
+    // 修正依頼メール
+    function sendCorrectionEmail() {
+      var subject = "経過サマリーの修正依頼";
+      var body = "患者ID: " + currentPatient.id + "\n患者名: " + currentPatient.name + "\n\n修正内容:\n";
+      window.location.href = "mailto:ishihara.brain@gmail.com?subject=" + 
+        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+    
+    function handleSendReport() {
+      var reporterName = document.getElementById('reporterName').value.trim();
+      var content = document.getElementById('reportInput').value.trim();
+      var isUrgent = document.getElementById('urgentAlertCheckbox').checked;
+      var reporterRole = document.querySelector('input[name="reporterRole"]:checked').value;
+      
+      if (!reporterName) {
+        alert("記録者名を入力してください");
+        document.getElementById('reporterName').focus();
+        return;
+      }
+      
+      if (!content && !selectedAudio && selectedImages.length === 0) {
+        alert("報告内容（テキスト、音声、または画像）を入力してください");
+        return;
+      }
+      
+      // 医師の場合のみ処方せん変更と通院/在宅精神療法の確認
+      if (reporterRole === 'doctor') {
+        showMedicalConfirmDialog(function(prescriptionChange, psychiatryTherapy, visitType) {
+          // 時間確認ダイアログを表示
+          showTimeConfirmDialog(function(startTime, endTime) {
+            proceedWithSend(startTime, endTime, reporterName, reporterRole, content, isUrgent, prescriptionChange, psychiatryTherapy, visitType);
+          });
+        });
+      } else {
+        // 看護師・スタッフの場合は直接時間確認へ
+        showTimeConfirmDialog(function(startTime, endTime) {
+          proceedWithSend(startTime, endTime, reporterName, reporterRole, content, isUrgent, undefined, undefined, undefined);
+        });
+      }
+    }
+    
+    // 処方せん変更・通院/在宅精神療法の確認ダイアログ
+    function showMedicalConfirmDialog(callback) {
+      var dialog = document.createElement('div');
+      dialog.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; display:flex; justify-content:center; align-items:center;';
+      
+      var content = document.createElement('div');
+      content.style.cssText = 'background:white; padding:30px; border-radius:12px; max-width:400px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+      
+      content.innerHTML = '<h3 style="margin:0 0 20px 0; font-size:18px; color:#333;">📋 確認事項</h3>' +
+        '<div style="margin-bottom:20px;">' +
+        '<div style="margin-bottom:15px; padding:12px; background:#e3f2fd; border-radius:8px;">' +
+        '<div style="font-size:14px; color:#666; margin-bottom:8px;">診療種別</div>' +
+        '<label style="display:flex; align-items:center; margin-bottom:6px; cursor:pointer;">' +
+        '<input type="radio" name="visitType" value="訪問" checked style="margin-right:8px; width:18px; height:18px; cursor:pointer;">' +
+        '<span style="font-size:15px;">訪問診療</span>' +
+        '</label>' +
+        '<label style="display:flex; align-items:center; cursor:pointer;">' +
+        '<input type="radio" name="visitType" value="外来" style="margin-right:8px; width:18px; height:18px; cursor:pointer;">' +
+        '<span style="font-size:15px;">外来診療</span>' +
+        '</label>' +
+        '</div>' +
+        '<label style="display:flex; align-items:center; padding:12px; background:#f5f5f5; border-radius:8px; cursor:pointer; margin-bottom:10px;">' +
+        '<input type="checkbox" id="prescriptionChange" style="margin-right:10px; width:20px; height:20px; cursor:pointer;">' +
+        '<span style="font-size:15px;">処方せんの変更あり</span>' +
+        '</label>' +
+        '<label style="display:flex; align-items:center; padding:12px; background:#f5f5f5; border-radius:8px; cursor:pointer;">' +
+        '<input type="checkbox" id="psychiatryTherapy" style="margin-right:10px; width:20px; height:20px; cursor:pointer;">' +
+        '<span style="font-size:15px;">通院／在宅精神療法あり</span>' +
+        '</label>' +
+        '</div>' +
+        '<div style="display:flex; gap:10px; justify-content:flex-end;">' +
+        '<button id="confirmBtn" style="padding:12px 24px; background:#2196f3; color:white; border:none; border-radius:8px; cursor:pointer; font-size:15px; font-weight:bold;">✓ 確認して次へ</button>' +
+        '</div>';
+      
+      dialog.appendChild(content);
+      document.body.appendChild(dialog);
+      
+      document.getElementById('confirmBtn').onclick = function() {
+        var visitType = document.querySelector('input[name="visitType"]:checked').value;
+        var prescriptionChange = document.getElementById('prescriptionChange').checked;
+        var psychiatryTherapy = document.getElementById('psychiatryTherapy').checked;
+        
+        document.body.removeChild(dialog);
+        callback(prescriptionChange, psychiatryTherapy, visitType);
+      };
+    }
+    
+    function proceedWithSend(startTime, endTime, reporterName, reporterRole, content, isUrgent, prescriptionChange, psychiatryTherapy, visitType) {
+      var btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = "📡 送信中...";
+      
+      // 緊急通知/リマインドの送信
+      if (isUrgent && content) {
+        var reporter = currentTag + '_' + reporterName;
+        if (reporterRole === 'nurse') {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              console.log("🚀 緊急メール送信完了");
+            })
+            .withFailureHandler(function(err) {
+              console.error("❌ 緊急メール送信エラー:", err);
+            })
+            .sendUrgentDoctorAlert(currentPatient.id, currentPatient.name, reporter, content);
+        }
+      }
+      
+      // 通常の送信処理
+      if (selectedAudio || selectedImages.length > 0) {
+        uploadFilesAndSend(content, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+      } else {
+        sendReportToServer(content, [], null, "", reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+      }
+    }
+    
+    function uploadFilesAndSend(content, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType) {
+      var uploadedImageUrls = [];
+      var audioUrl = null;
+      var audioTranscription = "";
+      var ocrText = "";
+      var performOCR = document.getElementById('ocrCheckbox').checked;
+      var totalUploads = selectedImages.length + (selectedAudio ? 1 : 0);
+      var completedUploads = 0;
+      
+      if (performOCR && selectedImages.length > 0) {
+        document.getElementById('sendBtn').textContent = "🔍 文字認識中...";
+      }
+      
+      selectedImages.forEach(function(imgData, index) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            completedUploads++;
+            if (res && res.success) {
+              uploadedImageUrls.push(res.url);
+            }
+            
+            if (completedUploads === totalUploads) {
+              if (performOCR && selectedImages.length > 0) {
+                performImageOCR(content, uploadedImageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+              } else {
+                sendReportToServer(content, uploadedImageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+              }
+            }
+          })
+          .withFailureHandler(function() {
+            completedUploads++;
+            if (completedUploads === totalUploads) {
+              sendReportToServer(content, uploadedImageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+            }
+          })
+          .uploadImageToDrive(imgData, 'image_' + Date.now() + '_' + index + '.jpg');
+      });
+      
+      // 音声ファイルのアップロードと文字起こし
+      if (selectedAudio) {
+        // ローディング表示
+        var btn = document.getElementById('sendBtn');
+        btn.textContent = "🎤 音声を文字起こし中...";
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var base64Audio = e.target.result;
+          google.script.run
+            .withSuccessHandler(function(res) {
+              completedUploads++;
+              if (res && res.success) {
+                audioUrl = res.url;
+                
+                // 文字起こし結果があれば、テキストエリアに追加
+                if (res.transcription) {
+                  audioTranscription = res.transcription;
+                  var reportInput = document.getElementById('reportInput');
+                  var currentText = reportInput.value.trim();
+                  
+                  // テキストが空の場合は文字起こし結果を設定
+                  if (!currentText) {
+                    reportInput.value = audioTranscription;
+                  } else {
+                    // 既存のテキストがある場合は追記
+                    reportInput.value = currentText + "\n\n【音声文字起こし】\n" + audioTranscription;
+                  }
+                  
+                  console.log("✅ 音声文字起こし完了: " + audioTranscription.substring(0, 50) + "...");
+                }
+              }
+              
+              if (completedUploads === totalUploads) {
+                sendReportToServer(reportInput.value.trim(), uploadedImageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+              }
+            })
+            .withFailureHandler(function(err) {
+              completedUploads++;
+              console.log("音声アップロードエラー:", err);
+              if (completedUploads === totalUploads) {
+                sendReportToServer(content, uploadedImageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+              }
+            })
+            .uploadAudioToDrive(base64Audio, selectedAudio.name);
+        };
+        reader.readAsDataURL(selectedAudio);
+      }
+    }
+    
+    // 旧関数（互換性のため残す）
+    function uploadImagesAndSend(content) {
+      uploadFilesAndSend(content);
+    }
+    
+    function performImageOCR(content, imageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType) {
+      console.log("🔍 画像OCR開始: " + selectedImages.length + "枚");
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.ocrText) {
+            console.log("✅ OCR成功: " + res.ocrText.length + "文字");
+            var fullContent = content;
+            if (res.ocrText.trim()) {
+              fullContent += (content ? "\n\n" : "") + "【画像から読み取ったテキスト】\n" + res.ocrText;
+            }
+            sendReportToServer(fullContent, imageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+          } else {
+            console.warn("⚠️ OCR失敗、通常送信へ");
+            sendReportToServer(content, imageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("❌ OCRエラー:", error);
+          alert("文字認識でエラーが発生しました。通常の送信を続行します。");
+          sendReportToServer(content, imageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType);
+        })
+        .performOCROnImages(selectedImages);
+    }
+    
+    function sendReportToServer(content, imageUrls, audioUrl, audioTranscription, reporterName, reporterRole, isUrgent, startTime, endTime, prescriptionChange, psychiatryTherapy, visitType) {
+      var finalContent = content || "";
+      
+      if (audioTranscription && !finalContent) {
+        finalContent = audioTranscription;
+      }
+      
+      if (audioUrl && !finalContent) {
+        finalContent = "（音声報告のみ）";
+      }
+      
+      // 確認事項を先頭に追加（医師の場合のみ）
+      var confirmInfo = "";
+      if (prescriptionChange !== undefined && psychiatryTherapy !== undefined && visitType !== undefined) {
+        confirmInfo += "【確認事項】\n";
+        confirmInfo += "診療種別: " + visitType + "\n";
+        confirmInfo += "処方せん変更: " + (prescriptionChange ? "あり" : "なし") + "\n";
+        confirmInfo += "通院／在宅精神療法: " + (psychiatryTherapy ? "あり" : "なし") + "\n\n";
+      }
+      
+      if (confirmInfo) {
+        finalContent = confirmInfo + finalContent;
+      }
+      
+      var reporter = currentTag + '_' + reporterName;
+      
+      google.script.run
+        .withSuccessHandler(onSendSuccess)
+        .withFailureHandler(onSendFailure)
+        .sendReportWithAudio(
+          currentPatient.id,
+          currentPatient.name,
+          currentTag,
+          reporter,
+          selectedScenario,
+          finalContent,
+          imageUrls,
+          "",
+          audioUrl,
+          reporterRole || 'nurse',
+          isUrgent || false,
+          startTime,
+          endTime
+        );
+    }
+    
+    function onSendSuccess(res) {
+      var btn = document.getElementById('sendBtn');
+      btn.disabled = false;
+      btn.textContent = "📤 送信";
+      
+      if (res && res.success) {
+        // 送信完了メッセージを表示
+        showQuickMessage('✅ 送信しました');
+        
+        // 2秒後に画面遷移
+        setTimeout(function() {
+          if (currentTag === "患者本人") {
+            showPatientDetail(currentPatient.id);
+          } else {
+            backToPatientList();
+          }
+        }, 2000);
+      } else {
+        alert("エラー: " + (res.msg || "送信に失敗しました"));
+      }
+    }
+    
+    function showQuickMessage(message) {
+      var msgDiv = document.createElement('div');
+      msgDiv.className = 'quick-message';
+      msgDiv.textContent = message;
+      document.body.appendChild(msgDiv);
+      
+      setTimeout(function() {
+        if (msgDiv.parentNode) {
+          document.body.removeChild(msgDiv);
+        }
+      }, 2000);
+    }
+    
+    function onSendFailure(error) {
+      var btn = document.getElementById('sendBtn');
+      btn.disabled = false;
+      btn.textContent = "📤 送信";
+      alert("通信エラー: " + (error.message || error));
+    }
+    
+    function showError(msg) {
+      var box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+    
+    function hideError() {
+      document.getElementById('errorBox').style.display = 'none';
+    }
+    
+    // 修正者名を入力させるダイアログ
+    function promptEditorName(callback) {
+      // ログイン中のタグやレポーター名から推測
+      var defaultName = "";
+      var reporterInput = document.getElementById('reporterName');
+      if (reporterInput && reporterInput.value.trim()) {
+        defaultName = reporterInput.value.trim();
+      }
+      
+      var name = prompt('修正者のお名前を入力してください:', defaultName);
+      if (name === null) return; // キャンセル
+      if (!name.trim()) {
+        alert('お名前を入力してください');
+        return;
+      }
+      callback(name.trim());
+    }
+    
+    // 記録を編集モードにする
+    function editRecord(reportId, recordId) {
+      var element = document.getElementById(recordId);
+      if (!element) {
+        alert('記録が見つかりません');
+        return;
+      }
+      
+      var currentText = element.textContent.trim();
+      var parentDiv = element.parentElement;
+      
+      // テキストエリアに置き換え
+      var textarea = document.createElement('textarea');
+      textarea.id = 'edit_' + recordId;
+      textarea.value = currentText;
+      textarea.style.width = '100%';
+      textarea.style.minHeight = '150px';
+      textarea.style.padding = '8px';
+      textarea.style.fontSize = '12px';
+      textarea.style.fontFamily = 'inherit';
+      textarea.style.border = '2px solid #ff9800';
+      textarea.style.borderRadius = '4px';
+      textarea.style.marginTop = '8px';
+      textarea.style.boxSizing = 'border-box';
+      
+      element.style.display = 'none';
+      parentDiv.appendChild(textarea);
+      
+      // 保存・キャンセルボタンを追加
+      var btnContainer = document.createElement('div');
+      btnContainer.style.marginTop = '8px';
+      btnContainer.style.display = 'flex';
+      btnContainer.style.gap = '8px';
+      
+      var saveBtn = document.createElement('button');
+      saveBtn.textContent = '💾 保存';
+      saveBtn.style.padding = '8px 16px';
+      saveBtn.style.background = '#4caf50';
+      saveBtn.style.color = 'white';
+      saveBtn.style.border = 'none';
+      saveBtn.style.borderRadius = '6px';
+      saveBtn.style.cursor = 'pointer';
+      saveBtn.style.fontWeight = 'bold';
+      saveBtn.onclick = function() {
+        promptEditorName(function(editorName) {
+          saveEditedRecord(reportId, recordId, textarea.value, editorName);
+        });
+      };
+      
+      var cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '✕ キャンセル';
+      cancelBtn.style.padding = '8px 16px';
+      cancelBtn.style.background = '#f44336';
+      cancelBtn.style.color = 'white';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.borderRadius = '6px';
+      cancelBtn.style.cursor = 'pointer';
+      cancelBtn.style.fontWeight = 'bold';
+      cancelBtn.onclick = function() {
+        cancelEdit(recordId);
+      };
+      
+      btnContainer.appendChild(saveBtn);
+      btnContainer.appendChild(cancelBtn);
+      btnContainer.id = 'btns_' + recordId;
+      
+      parentDiv.appendChild(btnContainer);
+    }
+    
+    // 編集を保存（修正者名付き）
+    function saveEditedRecord(reportId, recordId, editedText, editorName) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            // 表示を更新
+            var element = document.getElementById(recordId);
+            element.innerHTML = editedText.replace(/\n/g, '<br>');
+            element.style.display = 'block';
+            
+            // テキストエリアとボタンを削除
+            var textarea = document.getElementById('edit_' + recordId);
+            var btns = document.getElementById('btns_' + recordId);
+            if (textarea) textarea.remove();
+            if (btns) btns.remove();
+            
+            showQuickMessage('✅ 修正を保存しました（' + editorName + '）');
+          } else {
+            alert('保存に失敗しました: ' + (res.msg || '不明なエラー'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('エラーが発生しました: ' + error.message);
+        })
+        .updateManualSummary(reportId, editedText, editorName);
+    }
+    
+    // 追記モード
+    function appendRecord(reportId, recordId) {
+      var element = document.getElementById(recordId);
+      if (!element) {
+        alert('記録が見つかりません');
+        return;
+      }
+      
+      var parentDiv = element.parentElement;
+      
+      // 既に追記フォームがある場合は削除
+      var existingAppend = document.getElementById('append_' + recordId);
+      if (existingAppend) {
+        existingAppend.remove();
+        var existingBtns = document.getElementById('appendbtns_' + recordId);
+        if (existingBtns) existingBtns.remove();
+        return;
+      }
+      
+      // 追記用テキストエリア
+      var textarea = document.createElement('textarea');
+      textarea.id = 'append_' + recordId;
+      textarea.placeholder = '追記内容を入力してください...';
+      textarea.style.width = '100%';
+      textarea.style.minHeight = '80px';
+      textarea.style.padding = '8px';
+      textarea.style.fontSize = '12px';
+      textarea.style.fontFamily = 'inherit';
+      textarea.style.border = '2px solid #00bcd4';
+      textarea.style.borderRadius = '4px';
+      textarea.style.marginTop = '8px';
+      textarea.style.boxSizing = 'border-box';
+      
+      parentDiv.appendChild(textarea);
+      
+      // 追記・キャンセルボタン
+      var btnContainer = document.createElement('div');
+      btnContainer.style.marginTop = '8px';
+      btnContainer.style.display = 'flex';
+      btnContainer.style.gap = '8px';
+      btnContainer.id = 'appendbtns_' + recordId;
+      
+      var appendBtn = document.createElement('button');
+      appendBtn.textContent = '📝 追記を保存';
+      appendBtn.style.padding = '8px 16px';
+      appendBtn.style.background = '#00bcd4';
+      appendBtn.style.color = 'white';
+      appendBtn.style.border = 'none';
+      appendBtn.style.borderRadius = '6px';
+      appendBtn.style.cursor = 'pointer';
+      appendBtn.style.fontWeight = 'bold';
+      appendBtn.onclick = function() {
+        var appendText = textarea.value.trim();
+        if (!appendText) {
+          alert('追記内容を入力してください');
+          return;
+        }
+        promptEditorName(function(editorName) {
+          saveAppendRecord(reportId, recordId, appendText, editorName);
+        });
+      };
+      
+      var cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '✕ キャンセル';
+      cancelBtn.style.padding = '8px 16px';
+      cancelBtn.style.background = '#f44336';
+      cancelBtn.style.color = 'white';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.borderRadius = '6px';
+      cancelBtn.style.cursor = 'pointer';
+      cancelBtn.style.fontWeight = 'bold';
+      cancelBtn.onclick = function() {
+        textarea.remove();
+        btnContainer.remove();
+      };
+      
+      btnContainer.appendChild(appendBtn);
+      btnContainer.appendChild(cancelBtn);
+      parentDiv.appendChild(btnContainer);
+      
+      textarea.focus();
+    }
+    
+    // 追記を保存
+    function saveAppendRecord(reportId, recordId, appendText, editorName) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            // 表示を更新
+            var element = document.getElementById(recordId);
+            element.innerHTML = res.summary.replace(/\n/g, '<br>');
+            
+            // 追記フォームを削除
+            var textarea = document.getElementById('append_' + recordId);
+            var btns = document.getElementById('appendbtns_' + recordId);
+            if (textarea) textarea.remove();
+            if (btns) btns.remove();
+            
+            showQuickMessage('✅ 追記を保存しました（' + editorName + '）');
+          } else {
+            alert('追記に失敗しました: ' + (res.msg || '不明なエラー'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('エラーが発生しました: ' + error.message);
+        })
+        .appendToSummary(reportId, appendText, editorName);
+    }
+    
+    // 修正歴を表示
+    function showEditHistory(reportId) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            var msg = '📜 修正歴\n\n';
+            
+            if (!res.manualEdit && !res.editLog) {
+              msg += 'この記録はまだ修正されていません。';
+            } else {
+              if (res.lastEditor) {
+                msg += '最終修正者: ' + res.lastEditor + '\n';
+              }
+              if (res.lastEditDate) {
+                msg += '最終修正日時: ' + res.lastEditDate + '\n';
+              }
+              msg += '\n--- 修正ログ ---\n';
+              msg += res.editLog || '（ログなし）';
+            }
+            
+            alert(msg);
+          } else {
+            alert('修正歴の取得に失敗しました: ' + (res.msg || '不明なエラー'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('エラーが発生しました: ' + error.message);
+        })
+        .getEditHistory(reportId);
+    }
+    
+    // 編集をキャンセル
+    function cancelEdit(recordId) {
+      var element = document.getElementById(recordId);
+      element.style.display = 'block';
+      
+      var textarea = document.getElementById('edit_' + recordId);
+      var btns = document.getElementById('btns_' + recordId);
+      if (textarea) textarea.remove();
+      if (btns) btns.remove();
+    }
+    
+    // サマリーを再生成
+    function regenerateRecord(reportId, recordId) {
+      if (!confirm('修正内容を踏まえて、サマリーを再生成しますか？')) {
+        return;
+      }
+      
+      showQuickMessage('🔄 再生成中...');
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            // 表示を更新
+            var element = document.getElementById(recordId);
+            element.innerHTML = res.summary.replace(/\n/g, '<br>');
+            
+            showQuickMessage('✅ 再生成が完了しました');
+          } else {
+            alert('再生成に失敗しました: ' + (res.msg || '不明なエラー'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('エラーが発生しました: ' + error.message);
+        })
+        .regenerateSummaryWithContext(reportId);
+    }
+  </script>
+  
+  <!-- カメラモーダル -->
+  <div id="photoModal" class="photo-modal">
+    <video id="photoVideo" autoplay playsinline style="display:none;"></video>
+    <canvas id="photoCanvas" style="display:none;"></canvas>
+    <img id="photoPreview" style="display:none;">
+    
+    <div class="photo-controls">
+      <button id="captureBtn" onclick="capturePhoto()" style="display:none;">📷 撮影</button>
+      <button id="confirmPhotoBtn" onclick="confirmPhoto()" style="display:none; background:#4caf50;">✓ この写真を使う</button>
+      <button onclick="closePhotoModal()" style="background:#f44336;">✕ 閉じる</button>
+    </div>
+  </div>
+  
+  <!-- 時間確認ダイアログ -->
+  <div id="timeDialog" class="time-dialog-overlay">
+    <div class="time-dialog">
+      <h3>⏰ 訪問時間の確認</h3>
+      
+      <div class="time-input-group">
+        <label>開始時刻</label>
+        <input type="datetime-local" id="dialogStartTime">
+      </div>
+      
+      <div class="time-input-group">
+        <label>終了時刻</label>
+        <input type="datetime-local" id="dialogEndTime">
+      </div>
+      
+      <div class="time-dialog-buttons">
+        <button class="btn-confirm" onclick="confirmTime()">✓ この時刻で送信</button>
+        <button class="btn-cancel" onclick="cancelTime()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
